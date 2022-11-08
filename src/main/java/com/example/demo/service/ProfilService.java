@@ -20,4 +20,5 @@ public interface ProfilService  {
 
 
     ProfilDTO getPublicProfilInformation(String username);
+
 }

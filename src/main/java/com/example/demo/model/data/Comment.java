@@ -12,7 +12,7 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Long ownerId;
-    private String content;
+    private ERole content;
     private Date date;
 
     @JsonIgnore
@@ -36,11 +36,11 @@ public class Comment {
         this.id = id;
     }
 
-    public String getContent() {
+    public ERole getContent() {
         return content;
     }
 
-    public void setContent(String content) {
+    public void setContent(ERole content) {
         this.content = content;
     }
 

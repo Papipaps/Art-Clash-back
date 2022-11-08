@@ -11,6 +11,7 @@ public class ProfilDTO extends BaseDTO {
     private String firstname;
     private String lastname;
     private String username;
+    private String gender;
     private String email;
     private LocalDate createdDate;
     private String favColor;
@@ -19,6 +20,14 @@ public class ProfilDTO extends BaseDTO {
     private String country;
     private String category;
     private LocalDate dob;
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
     public Long getId() {
         return id;

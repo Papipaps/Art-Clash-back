@@ -3,10 +3,8 @@ package com.example.demo.service;
 import com.example.demo.model.data.Profil;
 import com.example.demo.model.dto.ProfilDTO;
 import com.example.demo.repository.ProfilRepository;
-import com.example.demo.utils.CustomMapper;
 import com.example.demo.utils.ProfilMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,14 +12,12 @@ import java.util.Optional;
 
 @Service
 public class ProfilServiceImp implements ProfilService {
-
+@Autowired
     ProfilMapper profilMapper;
-CustomMapper customMapper;
     @Autowired
     ProfilRepository profilRepository;
 
 
-    BCryptPasswordEncoder passwordEncoder;
 
 
     @Override
@@ -75,7 +71,13 @@ CustomMapper customMapper;
         Optional<Profil> optProfil= profilRepository.findByUsername(username);
         if (optProfil.isPresent()){
             Profil profil = optProfil.get();
-            return customMapper.mapProfilPublicData(profil);
+            ProfilDTO profilDTO = profilMapper.profilEntityToDTO(profil);
+            profilDTO.setEmail(null);
+            if (profilDTO.isAnonymous()){
+                profilDTO.setFirstname(null);
+                profilDTO.setLastname(null);
+            }
+            return profilDTO;
         }
         ProfilDTO res = new ProfilDTO();
         res.setErrorMessage("User not in db");

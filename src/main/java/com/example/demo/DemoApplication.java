@@ -4,8 +4,7 @@ import com.example.demo.controller.AuthController;
 import com.example.demo.model.data.ERole;
 import com.example.demo.model.data.Role;
 import com.example.demo.payload.request.SignupRequest;
-import com.example.demo.repository.ProfilRepository;
-import com.example.demo.repository.RoleRepository;
+import com.example.demo.service.RoleService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,15 +13,14 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.HashSet;
 import java.util.List;
 
 
 @SpringBootApplication
 public class DemoApplication {
-    final String LOCAL_HOST_URL = "http://127.0.0.1:3000/";
+    final java.lang.String LOCAL_HOST_URL = "http://127.0.0.1:3000/";
 
-    public static void main(String[] args) {
+    public static void main(java.lang.String[] args) {
         SpringApplication.run(DemoApplication.class, args);
     }
 
@@ -40,19 +38,25 @@ public class DemoApplication {
     }
 
     @Bean
-    CommandLineRunner run(RoleRepository roleRepository, AuthController authService, ProfilRepository profilRepository) throws Exception {
+    CommandLineRunner run(RoleService roleService, AuthController profilService) throws Exception {
         return args -> {
 
-            roleRepository.save(new Role(ERole.ROLE_ADMIN));
+            roleService.saveRole(new Role(ERole.ROLE_USER.name()));
+            roleService.saveRole(new Role(ERole.ROLE_ADMIN.name()));
             SignupRequest adminRequest = new SignupRequest();
-            adminRequest.setFirstname("userfirst");
-            adminRequest.setLastname("userlast");
-            adminRequest.setEmail("user@mail.fr");
+            adminRequest.setFirstname("firstname");
+            adminRequest.setLastname("lastname");
+            adminRequest.setEmail("admin@mail.fr");
             adminRequest.setUsername("admin");
             adminRequest.setPassword("password");
-            adminRequest.setRole(new HashSet<>(List.of("admin")));
+            profilService.registerUser(adminRequest);
+            adminRequest.setEmail("user@mail.fr");
+            adminRequest.setUsername("user");
+            adminRequest.setPassword("password");
+            profilService.registerUser(adminRequest);
 
-            authService.registerUser(adminRequest);
+            roleService.addRoleToUser("user", ERole.ROLE_USER.name());
+            roleService.addRoleToUser("admin", ERole.ROLE_ADMIN.name());
         };
     }
 

@@ -13,18 +13,26 @@ public class SignupRequest {
     @Email
     private String email;
 
-    @NotBlank
-    @Size(min = 2, max=40)
+
     private String firstname;
 
     private String lastname;
-    
+    private String gender;
+
     private Set<String> role;
     
     @NotBlank
     @Size(min = 6, max = 40)
     private String password;
     private String category;
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
     public String getFirstname() {
         return firstname;

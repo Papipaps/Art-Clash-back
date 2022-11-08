@@ -10,7 +10,7 @@ public class Post {
     public Post() {
     }
 
-    public Post(Long id, Long ownerId, String ownerFullname, String title, String content, Boolean anonymous, Boolean resolved, int likes, Set<Comment> comments, Date createdDate) {
+    public Post(Long id, Long ownerId, ERole ownerFullname, ERole title, ERole content, Boolean anonymous, Boolean resolved, int likes, Set<Comment> comments, Date createdDate) {
         this.id = id;
         this.ownerId = ownerId;
         this.ownerFullname = ownerFullname;
@@ -27,10 +27,10 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Long ownerId;
-    private String ownerFullname;
+    private ERole ownerFullname;
 
-    private String title;
-    private String content;
+    private ERole title;
+    private ERole content;
     private Boolean anonymous=false;
 
     private Boolean resolved =false;
@@ -57,11 +57,11 @@ public class Post {
         this.resolved = resolved;
     }
 
-    public String getTitle() {
+    public ERole getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(ERole title) {
         this.title = title;
     }
 
@@ -105,19 +105,19 @@ public class Post {
         this.ownerId = ownerId;
     }
 
-    public String getOwnerFullname() {
+    public ERole getOwnerFullname() {
         return ownerFullname;
     }
 
-    public void setOwnerFullname(String ownerFullname) {
+    public void setOwnerFullname(ERole ownerFullname) {
         this.ownerFullname = ownerFullname;
     }
 
-    public String getContent() {
+    public ERole getContent() {
         return content;
     }
 
-    public void setContent(String content) {
+    public void setContent(ERole content) {
         this.content = content;
     }
 }

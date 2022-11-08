@@ -5,8 +5,8 @@ import com.example.demo.model.dto.ProfilDTO;
 import com.example.demo.repository.ProfilRepository;
 import com.example.demo.service.ProfilService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,8 +40,8 @@ public class ProfilController {
 
     @GetMapping(path = "getPublicInformation")
     ProfilDTO getProfilInfo() {
-      UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-      String username = userDetails.getUsername();
+        Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
+        String username = loggedInUser.getName();
         return profilService.getPublicProfilInformation(username);
     }
 

@@ -1,32 +1,23 @@
 package com.example.demo.model.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "roles")
 public class Role {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.AUTO)
   private Integer id;
 
-  @Enumerated(EnumType.STRING)
   @Column(length = 20)
-  private ERole name;
+  private String name;
 
-  @JsonIgnore
-  @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(name = "profil_roles",
-          joinColumns = @JoinColumn(name = "roles_id"))
-  private Set<Profil> profil;
 
   public Role() {
 
   }
 
-  public Role(ERole name) {
+  public Role(String name) {
     this.name = name;
   }
 
@@ -38,11 +29,8 @@ public class Role {
     this.id = id;
   }
 
-  public ERole getName() {
+  public String getName() {
     return name;
   }
 
-  public void setName(ERole name) {
-    this.name = name;
-  }
 }

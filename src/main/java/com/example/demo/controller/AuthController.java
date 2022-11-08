@@ -1,54 +1,55 @@
-package com.example.demo.controller;
+ package com.example.demo.controller;
 
 
-import com.example.demo.model.data.ERole;
-import com.example.demo.model.data.Profil;
-import com.example.demo.model.data.Role;
-import com.example.demo.payload.request.LoginRequest;
-import com.example.demo.payload.request.SignupRequest;
-import com.example.demo.payload.response.MessageResponse;
-import com.example.demo.payload.response.UserInfoResponse;
-import com.example.demo.repository.ProfilRepository;
-import com.example.demo.repository.RoleRepository;
-import com.example.demo.security.jwt.JwtUtils;
-import com.example.demo.security.services.UserDetailsImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+ import com.auth0.jwt.JWT;
+ import com.auth0.jwt.JWTVerifier;
+ import com.auth0.jwt.algorithms.Algorithm;
+ import com.auth0.jwt.interfaces.DecodedJWT;
+ import com.example.demo.model.data.Profil;
+ import com.example.demo.model.data.Role;
+ import com.example.demo.payload.request.LoginRequest;
+ import com.example.demo.payload.request.SignupRequest;
+ import com.example.demo.payload.response.MessageResponse;
+ import com.example.demo.payload.response.UserInfoResponse;
+ import com.example.demo.repository.ProfilRepository;
+ import com.example.demo.security.services.UserDetailsImpl;
+ import com.fasterxml.jackson.databind.ObjectMapper;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.http.HttpHeaders;
+ import org.springframework.http.MediaType;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.security.authentication.AuthenticationManager;
+ import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+ import org.springframework.security.core.Authentication;
+ import org.springframework.security.core.context.SecurityContextHolder;
+ import org.springframework.security.crypto.password.PasswordEncoder;
+ import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpServletResponse;
+ import javax.validation.Valid;
+ import java.time.Instant;
+ import java.time.temporal.ChronoUnit;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+ @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    AuthenticationManager authenticationManager;
 
     @Autowired
     ProfilRepository profilRepository;
 
     @Autowired
-    RoleRepository roleRepository;
-
+    private  PasswordEncoder passwordEncoder;
     @Autowired
-    BCryptPasswordEncoder encoder;
+    private AuthenticationManager authenticationManager;
 
-    @Autowired
-    JwtUtils jwtUtils;
 
-    @PostMapping("/signin")
+     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager
@@ -58,22 +59,21 @@ public class AuthController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
 
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .body(new UserInfoResponse(userDetails.getId(),
+        return ResponseEntity.ok().body(new UserInfoResponse(userDetails.getId(),
                         userDetails.getUsername(),
-                        userDetails.getEmail(),
-                        roles));
+                        userDetails.getEmail(),roles));
     }
 
 
+
+
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<?> registerUser( @RequestBody SignupRequest signUpRequest) {
         if (profilRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
@@ -83,41 +83,29 @@ public class AuthController {
         }
 
         // Create new user's account
-        Profil profil = new Profil(signUpRequest.getFirstname(), signUpRequest.getLastname(), signUpRequest.getUsername(),
-                signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()));
-
-        Set<String> strRoles = signUpRequest.getRole();
-        Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
-                    case "mod":
-                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(modRole);
-
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
-                }
-            });
+        Profil profil = new Profil();
+        if (signUpRequest.getUsername() != null) {
+            profil.setUsername(signUpRequest.getUsername());
+        }
+        if (signUpRequest.getFirstname() != null) {
+            profil.setFirstname(signUpRequest.getFirstname());
+        }
+        if (signUpRequest.getLastname() != null) {
+            profil.setLastname(signUpRequest.getLastname());
+        }
+        if (signUpRequest.getGender()!=null){
+            profil.setGender(signUpRequest.getGender());
+        }
+        if (signUpRequest.getEmail() != null) {
+            profil.setEmail(signUpRequest.getEmail());
+        }
+        if (signUpRequest.getCategory() != null) {
+            profil.setCategory(signUpRequest.getCategory());
+        }
+        if (signUpRequest.getPassword() != null) {
+            profil.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         }
 
-        profil.setRoles(roles);
         profilRepository.save(profil);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
@@ -125,8 +113,41 @@ public class AuthController {
 
     @PostMapping("/signout")
     public ResponseEntity<?> logoutUser() {
-        ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
+        return ResponseEntity.ok()
                 .body(new MessageResponse("You've been signed out!"));
     }
+
+    @PostMapping("/token/refresh")
+     public void refreshToken(HttpServletRequest request, HttpServletResponse response){
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            try {
+                String refresh_token = authHeader.substring("Bearer ".length());
+                Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
+                JWTVerifier verifier = JWT.require(algorithm).build();
+                DecodedJWT decodedJWT = verifier.verify(refresh_token);
+                String username = decodedJWT.getSubject();
+                Profil profil = profilRepository.findByUsername(username).get();
+
+                String access_token = JWT.create()
+                        .withSubject(profil.getUsername())
+                        .withExpiresAt(Instant.now().plus(1, ChronoUnit.DAYS))
+                        .withIssuer(request.getRequestURL().toString())
+                        .withClaim("roles",profil.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+                        .sign(algorithm);
+
+                Map<String,String> tokens= new HashMap<>();
+                tokens.put("access_token",access_token);
+                tokens.put("refresh_token",refresh_token);
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                new ObjectMapper().writeValue(response.getOutputStream(),tokens);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }else {
+            throw new RuntimeException("Refresh token is missing !");
+        }
+    }
 }
+
