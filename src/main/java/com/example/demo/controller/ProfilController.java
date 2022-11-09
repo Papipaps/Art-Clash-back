@@ -22,6 +22,10 @@ public class ProfilController {
     ProfilRepository profilRepository;
 
 
+    @GetMapping
+    public String hello(){
+        return "hello";
+    }
     @PutMapping(path = "update")
     ProfilDTO updateProfil(@RequestBody ProfilDTO profilDTO) {
         return profilService.updateProfil(profilDTO);
