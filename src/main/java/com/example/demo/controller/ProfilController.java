@@ -41,6 +41,12 @@ public class ProfilController {
     ProfilDTO getProfil(@PathVariable("id") String username) {
         return profilService.getProfil(username);
     }
+    @GetMapping(path = "getProfilInformation")
+    ProfilDTO getProfil() {
+        Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
+        String username = loggedInUser.getName();
+        return profilService.getProfil(username);
+    }
 
     @GetMapping(path = "getPublicInformation")
     ProfilDTO getProfilInfo() {

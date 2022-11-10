@@ -39,6 +39,7 @@ public class Profil {
     private String lastname;
 
     private String category;
+    private String description;
 
     private LocalDate dob;
     private LocalDate createdDate;
@@ -65,6 +66,14 @@ public class Profil {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getUsername() {

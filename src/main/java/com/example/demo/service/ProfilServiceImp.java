@@ -28,7 +28,7 @@ public class ProfilServiceImp implements ProfilService {
     @Override
     public ProfilDTO getProfil(String username) {
         ProfilDTO res = new ProfilDTO();
-        Profil profil = profilRepository.findByEmail(username).orElseThrow(() -> new RuntimeException("User not in db"));
+        Profil profil = profilRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not in db"));
         if (profil == null) {
             res.setErrorMessage("User not in db");
             res.setIsError(true);
@@ -40,15 +40,16 @@ public class ProfilServiceImp implements ProfilService {
 
     @Override
     public ProfilDTO updateProfil(ProfilDTO profilDTO) {
-        Profil profil = (profilRepository.findById(profilDTO.getId()).isPresent()) ? profilRepository.findById(profilDTO.getId()).get() : null;
-        if (profil == null) {
+        Optional<Profil> optProfil = profilRepository.findByUsername(profilDTO.getUsername());
+        if (optProfil.isEmpty()) {
             ProfilDTO res = new ProfilDTO();
             res.setErrorMessage("User not in db");
             res.setIsError(true);
             return res;
         }
-        profilRepository.save(profilMapper.updateUserFromDTO(profilDTO, profil));
-        return profilMapper.profilEntityToDTO(profil);
+        Profil profil = optProfil.get();
+
+        return profilMapper.profilEntityToDTO(profilRepository.save(profilMapper.updateUserFromDTO(profilDTO, profil)));
     }
 
     @Override

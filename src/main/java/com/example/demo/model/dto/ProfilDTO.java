@@ -2,6 +2,8 @@ package com.example.demo.model.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
@@ -11,6 +13,8 @@ public class ProfilDTO extends BaseDTO {
     private String firstname;
     private String lastname;
     private String username;
+
+    private String description;
     private String gender;
     private String email;
     private LocalDate createdDate;
@@ -20,6 +24,14 @@ public class ProfilDTO extends BaseDTO {
     private String country;
     private String category;
     private LocalDate dob;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getGender() {
         return gender;
