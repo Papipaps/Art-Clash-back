@@ -10,7 +10,6 @@
  import com.example.demo.model.data.Role;
  import com.example.demo.model.dto.ProfilDTO;
  import com.example.demo.payload.request.SignupRequest;
- import com.example.demo.payload.response.MessageResponse;
  import com.example.demo.repository.ProfilRepository;
  import com.example.demo.service.RoleService;
  import com.example.demo.utils.ProfilMapper;
@@ -18,7 +17,6 @@
  import org.springframework.beans.factory.annotation.Autowired;
  import org.springframework.http.HttpHeaders;
  import org.springframework.http.MediaType;
- import org.springframework.http.ResponseEntity;
  import org.springframework.security.authentication.AuthenticationManager;
  import org.springframework.security.core.userdetails.UsernameNotFoundException;
  import org.springframework.security.crypto.password.PasswordEncoder;
@@ -90,13 +88,6 @@ public class AuthController {
         return profilMapper.profilEntityToDTO(save);
 
      }
-
-    @PostMapping("/signout")
-    public ResponseEntity<?> logoutUser() {
-        return ResponseEntity.ok()
-                .body(new MessageResponse("You've been signed out!"));
-    }
-
     @PostMapping("/token/refresh")
      public void refreshToken(HttpServletRequest request, HttpServletResponse response){
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
