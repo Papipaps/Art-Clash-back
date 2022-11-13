@@ -56,7 +56,7 @@ public class ProfilController {
     }
 
     @DeleteMapping(path = "delete/{id}")
-    ProfilDTO deleteProfil(@PathVariable("id") Long id) {
+    ProfilDTO deleteProfil(@PathVariable("id") String id) {
         return profilService.deleteProfil(id);
     }
 }

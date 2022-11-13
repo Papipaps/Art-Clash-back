@@ -1,4 +1,4 @@
-package com.example.demo.utils;
+package com.example.demo.utils.mapper;
 
 import com.example.demo.model.data.Profil;
 import com.example.demo.model.dto.ProfilDTO;

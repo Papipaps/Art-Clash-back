@@ -12,7 +12,7 @@
  import com.example.demo.payload.request.SignupRequest;
  import com.example.demo.repository.ProfilRepository;
  import com.example.demo.service.RoleService;
- import com.example.demo.utils.ProfilMapper;
+ import com.example.demo.utils.mapper.ProfilMapper;
  import com.fasterxml.jackson.databind.ObjectMapper;
  import org.springframework.beans.factory.annotation.Autowired;
  import org.springframework.http.HttpHeaders;
@@ -61,6 +61,7 @@ public class AuthController {
 
         // Create new user's account
         Profil profil = new Profil();
+
         if (signUpRequest.getUsername() != null) {
             profil.setUsername(signUpRequest.getUsername());
         }

@@ -1,5 +1,7 @@
 package com.example.demo.model.data;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -16,8 +18,9 @@ import java.util.Collection;
         })
 public class Profil {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID",strategy = "org.hibernate.id.UUIDGenerator")
+    private String id;
 
     @NotBlank
     @Size(max = 20)
@@ -60,11 +63,11 @@ public class Profil {
     public Profil() {
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

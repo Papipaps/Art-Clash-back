@@ -2,14 +2,12 @@ package com.example.demo.model.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDate;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProfilDTO extends BaseDTO {
-    private Long id;
+    private String id;
     private String firstname;
     private String lastname;
     private String username;
@@ -41,11 +39,11 @@ public class ProfilDTO extends BaseDTO {
         this.gender = gender;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

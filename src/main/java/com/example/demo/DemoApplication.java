@@ -4,11 +4,16 @@ import com.example.demo.controller.AuthController;
 import com.example.demo.model.data.ERole;
 import com.example.demo.model.data.Role;
 import com.example.demo.payload.request.SignupRequest;
+import com.example.demo.repository.CommentRepository;
+import com.example.demo.repository.PostRepository;
+import com.example.demo.repository.ProfilRepository;
+import com.example.demo.repository.RoleRepository;
 import com.example.demo.service.RoleService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -17,6 +22,7 @@ import java.util.List;
 
 
 @SpringBootApplication
+@EnableMongoRepositories
 public class DemoApplication {
     final java.lang.String LOCAL_HOST_URL = "http://127.0.0.1:3000/";
 
@@ -31,32 +37,40 @@ public class DemoApplication {
         configuration.setAllowedMethods(List.of("HEAD",
                 "GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(List.of( "Authorization", "Cache-Control", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 
     @Bean
-    CommandLineRunner run(RoleService roleService, AuthController profilService) throws Exception {
+    CommandLineRunner run(RoleRepository roleRepository, ProfilRepository profilRepository, AuthController profilService, RoleService roleService , CommentRepository commentRepository, PostRepository postRepository) throws Exception {
         return args -> {
+            if (roleRepository.findByName("ROLE_ADMIN").isEmpty()){
+           roleService.saveRole(new Role(ERole.ROLE_ADMIN.name()));
+            }
+            if (roleRepository.findByName("ROLE_USER").isEmpty()){
+           roleService.saveRole(new Role(ERole.ROLE_USER.name()));
+            }
+           if (!profilRepository.existsByUsername("admin")){
 
-            roleService.saveRole(new Role(ERole.ROLE_USER.name()));
-            roleService.saveRole(new Role(ERole.ROLE_ADMIN.name()));
-            SignupRequest adminRequest = new SignupRequest();
-            adminRequest.setFirstname("firstname");
-            adminRequest.setLastname("lastname");
-            adminRequest.setEmail("admin@mail.fr");
-            adminRequest.setUsername("admin");
-            adminRequest.setPassword("password");
-            profilService.registerUser(adminRequest);
-            adminRequest.setEmail("user@mail.fr");
-            adminRequest.setUsername("user");
-            adminRequest.setPassword("password");
-            profilService.registerUser(adminRequest);
+           SignupRequest adminRequest = new SignupRequest();
+           adminRequest.setFirstname("firstname");
+           adminRequest.setLastname("lastname");
+           adminRequest.setEmail("admin@mail.fr");
+           adminRequest.setUsername("admin");
+           adminRequest.setPassword("password");
+           profilService.registerUser(adminRequest);
+           roleService.addRoleToUser("admin", ERole.ROLE_ADMIN.name());
+           }
+           //roleService.addRoleToUser("user", ERole.ROLE_USER.name());
 
-            roleService.addRoleToUser("user", ERole.ROLE_USER.name());
-            roleService.addRoleToUser("admin", ERole.ROLE_ADMIN.name());
+
+           //Post post = postRepository.save(new Post(null, 3L, "Firtname Lastname", "TITRE", "DESCRIPTION", false, false, new Date()));
+           //Comment comment = commentRepository.save(new Comment(3L, "Firtname Lastname", "Je suis un commentaire", new Date(),post));
+           //Comment comment2 = commentRepository.save(new Comment(3L, "Firtname Lastname", "Je suis un commentaire", new Date(),post));
+           //Comment comment3 = commentRepository.save(new Comment(3L, "Firtname Lastname", "Je suis un commentaire", new Date(),post));
+
         };
     }
 

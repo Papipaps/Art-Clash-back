@@ -3,7 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.data.Profil;
 import com.example.demo.model.dto.ProfilDTO;
 import com.example.demo.repository.ProfilRepository;
-import com.example.demo.utils.ProfilMapper;
+import com.example.demo.utils.mapper.ProfilMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +53,7 @@ public class ProfilServiceImp implements ProfilService {
     }
 
     @Override
-    public ProfilDTO deleteProfil(Long id) {
+    public ProfilDTO deleteProfil(String id) {
         Profil profil = (profilRepository.findById(id).isPresent()) ? profilRepository.findById(id).get() : null;
         if (profil == null) {
             ProfilDTO res = new ProfilDTO();

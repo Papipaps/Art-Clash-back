@@ -16,7 +16,7 @@ public interface ProfilService  {
 
     ProfilDTO updateProfil(ProfilDTO profilDTO);
 
-    ProfilDTO deleteProfil(Long id);
+    ProfilDTO deleteProfil(String id);
 
 
     ProfilDTO getPublicProfilInformation(String username);
