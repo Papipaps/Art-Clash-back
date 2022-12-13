@@ -1,13 +1,13 @@
 package com.example.demo.model.data;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import javax.persistence.*;
 import java.util.Date;
 
-@Entity
-@Table(name = "likes")
+@Document
 public class Likes {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Long ownerId;
     private Long postId;

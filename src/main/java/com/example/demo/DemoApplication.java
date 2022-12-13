@@ -2,12 +2,10 @@ package com.example.demo;
 
 import com.example.demo.controller.AuthController;
 import com.example.demo.model.data.ERole;
+import com.example.demo.model.data.Profile;
 import com.example.demo.model.data.Role;
 import com.example.demo.payload.request.SignupRequest;
-import com.example.demo.repository.CommentRepository;
-import com.example.demo.repository.PostRepository;
-import com.example.demo.repository.ProfilRepository;
-import com.example.demo.repository.RoleRepository;
+import com.example.demo.repository.*;
 import com.example.demo.service.RoleService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -19,10 +17,11 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @SpringBootApplication
-@EnableMongoRepositories
+@EnableMongoRepositories(basePackages = "com.example.demo.repository")
 public class DemoApplication {
     final java.lang.String LOCAL_HOST_URL = "http://127.0.0.1:3000/";
 
@@ -44,7 +43,7 @@ public class DemoApplication {
     }
 
     @Bean
-    CommandLineRunner run(RoleRepository roleRepository, ProfilRepository profilRepository, AuthController profilService, RoleService roleService , CommentRepository commentRepository, PostRepository postRepository) throws Exception {
+    CommandLineRunner run(RoleRepository roleRepository, ProfileRepository profilRepository, ProfileRepository profileRepository, AuthController profilService, RoleService roleService , CommentRepository commentRepository, PostRepository postRepository) throws Exception {
         return args -> {
             if (roleRepository.findByName("ROLE_ADMIN").isEmpty()){
            roleService.saveRole(new Role(ERole.ROLE_ADMIN.name()));
@@ -63,6 +62,13 @@ public class DemoApplication {
            profilService.registerUser(adminRequest);
            roleService.addRoleToUser("admin", ERole.ROLE_ADMIN.name());
            }
+            Optional<Profile> jojo = profileRepository.findByUsername("jojo");
+            if (!jojo.isPresent()){
+                profileRepository.save(Profile.builder().username("jojo").email("jojo@yopmail.com").build());
+            }else{
+                profileRepository.deleteById(jojo.get().getId());
+                profileRepository.save(Profile.builder().username("jojo").email("jojo@yopmail.com").build());
+            }
            //roleService.addRoleToUser("user", ERole.ROLE_USER.name());
 
 

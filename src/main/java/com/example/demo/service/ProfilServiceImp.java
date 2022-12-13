@@ -1,8 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.model.data.Profil;
+import com.example.demo.model.data.Profile;
 import com.example.demo.model.dto.ProfilDTO;
-import com.example.demo.repository.ProfilRepository;
+import com.example.demo.repository.ProfileRepository;
 import com.example.demo.utils.mapper.ProfilMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ public class ProfilServiceImp implements ProfilService {
 @Autowired
     ProfilMapper profilMapper;
     @Autowired
-    ProfilRepository profilRepository;
+    ProfileRepository profilRepository;
 
 
 
@@ -28,7 +28,7 @@ public class ProfilServiceImp implements ProfilService {
     @Override
     public ProfilDTO getProfil(String username) {
         ProfilDTO res = new ProfilDTO();
-        Profil profil = profilRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not in db"));
+        Profile profil = profilRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not in db"));
         if (profil == null) {
             res.setErrorMessage("User not in db");
             res.setIsError(true);
@@ -40,21 +40,21 @@ public class ProfilServiceImp implements ProfilService {
 
     @Override
     public ProfilDTO updateProfil(ProfilDTO profilDTO) {
-        Optional<Profil> optProfil = profilRepository.findByUsername(profilDTO.getUsername());
+        Optional<Profile> optProfil = profilRepository.findByUsername(profilDTO.getUsername());
         if (optProfil.isEmpty()) {
             ProfilDTO res = new ProfilDTO();
             res.setErrorMessage("User not in db");
             res.setIsError(true);
             return res;
         }
-        Profil profil = optProfil.get();
+        Profile profil = optProfil.get();
 
         return profilMapper.profilEntityToDTO(profilRepository.save(profilMapper.updateUserFromDTO(profilDTO, profil)));
     }
 
     @Override
     public ProfilDTO deleteProfil(String id) {
-        Profil profil = (profilRepository.findById(id).isPresent()) ? profilRepository.findById(id).get() : null;
+        Profile profil = (profilRepository.findById(id).isPresent()) ? profilRepository.findById(id).get() : null;
         if (profil == null) {
             ProfilDTO res = new ProfilDTO();
             res.setErrorMessage("User not in db");
@@ -69,9 +69,9 @@ public class ProfilServiceImp implements ProfilService {
 
     @Override
     public ProfilDTO getPublicProfilInformation(String username) {
-        Optional<Profil> optProfil= profilRepository.findByUsername(username);
+        Optional<Profile> optProfil= profilRepository.findByUsername(username);
         if (optProfil.isPresent()){
-            Profil profil = optProfil.get();
+            Profile profil = optProfil.get();
             ProfilDTO profilDTO = profilMapper.profilEntityToDTO(profil);
             profilDTO.setEmail(null);
             if (profilDTO.isAnonymous()){

@@ -1,69 +1,67 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.data.Media;
-import com.example.demo.model.data.Profil;
 import com.example.demo.model.dto.MediaDTO;
-import com.example.demo.repository.MediaRepository;
-import com.example.demo.repository.ProfilRepository;
-import com.example.demo.utils.CustomPageDTO;
-import com.example.demo.utils.mapper.CustomPageMapper;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import com.example.demo.payload.response.MessageResponse;
+import com.example.demo.service.MediaService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/media")
 public class MediaController {
 
     @Autowired
-    MediaRepository mediaRepository;
-    @Autowired
-    ProfilRepository profilRepository;
+    MediaService mediaService;
 
-    @Autowired
-    CustomPageMapper mediaMapper;
-@PostMapping("/upload")
-    public ResponseEntity<?> uploadMedia(@RequestParam MultipartFile file) throws Exception{
-    if (file==null){
-        throw new FileUploadException("File must not be null.");
+    @PostMapping("upload")
+    public ResponseEntity<?> uploadImageToFileSystem(@RequestBody MultipartFile file) throws IOException {
+        Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
+        String username = loggedInUser.getName();
+        String uploadImage = mediaService.uploadImageToFileSystem(file,username);
+        return ResponseEntity.status(HttpStatus.CREATED).body(uploadImage);
+    }
+
+    @GetMapping("download/{id}")
+    public ResponseEntity<?> downloadImageFromFileSystem(@PathVariable String id) throws IOException {
+        byte[] imageData = mediaService.downloadImageFromFileSystem(id);
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(imageData);
 
     }
-    if (!file.getContentType().equals("image/jpeg")||!file.getContentType().equals("image/jpeg")){
-        throw new FileUploadException("File must be of png/jpeg type !");
-    }
-    Media media=new Media();
-    String username = SecurityContextHolder.getContext().getAuthentication().getName();
-    Profil profil = profilRepository.findByUsername(username).get();
-    media.setFilename("attachment_"+profil.getUsername()+"_"+file.getOriginalFilename());
-    media.setContent(file.getBytes());
-    media.setFileType(file.getContentType());
-    media.setFileSize(file.getSize());
-    media.setOwnerId(profil.getId());
-    mediaRepository.save(media);
-    return ResponseEntity.ok().body("Image uploaded");
-}
-
-@GetMapping("/download/{id}")
-    public MediaDTO downloadFile(@PathVariable("id") String id){
-    Media media=mediaRepository.findById(id).orElseThrow(() -> new RuntimeException("No media with ID "+id));
-    String downloadURL= ServletUriComponentsBuilder.fromCurrentContextPath().path("/download/attachment/").path(media.getId()).toUriString();
-    return new MediaDTO(downloadURL,media.getFilename(),media.getFileSize(),media.getFileType());
-}
-
-    @GetMapping("/downloadAllById/{id}")
-    public CustomPageDTO<MediaDTO> downloadAllFile(@PathVariable("id") String id,
-                                          @RequestParam int page, @RequestParam int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Media> mediaPage = mediaRepository.findAllByOwnerId(id, pageable);
-        return  mediaMapper.pageToPageDTO(mediaPage);
+    @GetMapping("downloadByOwner/{ownerId}")
+    public ResponseEntity<?> downloadImageFromFileSystemOwner(@PathVariable String ownerId) throws IOException {
+        MediaDTO imageData = mediaService.downloadMediaByOwner(ownerId);
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(imageData);
 
     }
+
+    @GetMapping("downloadAllByOwner/{ownerId}")
+    public ResponseEntity<?> downloadAllByOwner(@PathVariable String ownerId, @RequestParam(defaultValue = "0",required = false) int page,@RequestParam(defaultValue = "9",required = false)int size) throws IOException {
+        var imageData = mediaService.downloadAllMediaByOwner(ownerId, PageRequest.of(page, size));
+        return ResponseEntity.status(HttpStatus.OK).body(imageData);
+
+    }
+    @DeleteMapping("deleteMedia/{id}")
+    public ResponseEntity<?> downloadAllByOwner(@PathVariable String id) {
+        boolean deleted = mediaService.delete(id);
+        String payload = deleted?"Media has been deleted successfully !":"Error while deleting media with id : "+id+".";
+        MessageResponse messageResponse =MessageResponse.builder().message(payload).hasError(!deleted).build();
+        return ResponseEntity.status(HttpStatus.OK).body(messageResponse);
+
+    }
+    @GetMapping("getThumbnail/{id}")
+    public ResponseEntity<?> getThumbmailImage(@PathVariable String id) throws IOException {
+        byte[] thumbmail = mediaService.getThumbmail(id);
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(thumbmail);
+    }
+
 
 }

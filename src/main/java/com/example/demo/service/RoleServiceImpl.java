@@ -1,8 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.model.data.Profil;
+import com.example.demo.model.data.Profile;
 import com.example.demo.model.data.Role;
-import com.example.demo.repository.ProfilRepository;
+import com.example.demo.repository.ProfileRepository;
 import com.example.demo.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,14 +11,14 @@ import org.springframework.stereotype.Service;
 public class RoleServiceImpl implements RoleService{
 
     @Autowired
-    ProfilRepository profilRepository;
+    ProfileRepository profilRepository;
 
     @Autowired
     RoleRepository roleRepository;
 
     @Override
     public void addRoleToUser(String username, String roleName) {
-        Profil profil = profilRepository.findByUsername(username).get();
+        Profile profil = profilRepository.findByUsername(username).get();
         Role role=roleRepository.findByName(roleName).get();
         profil.getRoles().add(role);
         profilRepository.save(profil);

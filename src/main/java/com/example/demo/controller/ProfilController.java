@@ -1,8 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.data.Profil;
+import com.example.demo.model.data.Profile;
 import com.example.demo.model.dto.ProfilDTO;
-import com.example.demo.repository.ProfilRepository;
+import com.example.demo.repository.ProfileRepository;
 import com.example.demo.service.ProfilService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -19,7 +19,7 @@ public class ProfilController {
     ProfilService profilService;
 
     @Autowired
-    ProfilRepository profilRepository;
+    ProfileRepository profilRepository;
 
 
     @GetMapping
@@ -33,25 +33,26 @@ public class ProfilController {
 
     //@PreAuthorize("hasRole('ADMIN')")
     @GetMapping(path = "list")
-    List<Profil> getProfils() {
+    List<Profile> getProfils() {
         return profilRepository.findAll();
     }
 
-    @GetMapping(path = "get/{id}")
-    ProfilDTO getProfil(@PathVariable("id") String username) {
-        return profilService.getProfil(username);
-    }
+    //@GetMapping(path = "get/{id}")
+    //ProfilDTO getProfil(@PathVariable("id") String username) {
+    //    return profilService.getProfil(username);
+    //}
+
     @GetMapping(path = "getProfilInformation")
-    ProfilDTO getProfil() {
+    ProfilDTO getProfil(@RequestParam(required = false) String username) {
         Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
-        String username = loggedInUser.getName();
+        username = username == null || username.isBlank() ? loggedInUser.getName() : username;
         return profilService.getProfil(username);
     }
 
     @GetMapping(path = "getPublicInformation")
-    ProfilDTO getProfilInfo() {
+    ProfilDTO getProfilInfo(@RequestParam(required = false) String username) {
         Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
-        String username = loggedInUser.getName();
+        username = username == null || username.isBlank() ? loggedInUser.getName() : username;
         return profilService.getPublicProfilInformation(username);
     }
 

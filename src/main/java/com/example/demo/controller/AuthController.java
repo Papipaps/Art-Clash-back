@@ -6,11 +6,11 @@
  import com.auth0.jwt.algorithms.Algorithm;
  import com.auth0.jwt.interfaces.DecodedJWT;
  import com.example.demo.model.data.ERole;
- import com.example.demo.model.data.Profil;
+ import com.example.demo.model.data.Profile;
  import com.example.demo.model.data.Role;
  import com.example.demo.model.dto.ProfilDTO;
  import com.example.demo.payload.request.SignupRequest;
- import com.example.demo.repository.ProfilRepository;
+ import com.example.demo.repository.ProfileRepository;
  import com.example.demo.service.RoleService;
  import com.example.demo.utils.mapper.ProfilMapper;
  import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +36,7 @@
 public class AuthController {
 
     @Autowired
-    ProfilRepository profilRepository;
+    ProfileRepository profilRepository;
 
     @Autowired
     private  PasswordEncoder passwordEncoder;
@@ -60,7 +60,7 @@ public class AuthController {
         }
 
         // Create new user's account
-        Profil profil = new Profil();
+        Profile profil = new Profile();
 
         if (signUpRequest.getUsername() != null) {
             profil.setUsername(signUpRequest.getUsername());
@@ -83,7 +83,7 @@ public class AuthController {
         if (signUpRequest.getPassword() != null) {
             profil.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         }
-        Profil save = profilRepository.save(profil);
+        Profile save = profilRepository.save(profil);
         roleService.addRoleToUser(save.getUsername(), ERole.ROLE_USER.name());
 
         return profilMapper.profilEntityToDTO(save);
@@ -99,7 +99,7 @@ public class AuthController {
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(refresh_token);
                 String username = decodedJWT.getSubject();
-                Profil profil = profilRepository.findByUsername(username).get();
+                Profile profil = profilRepository.findByUsername(username).get();
 
                 String access_token = JWT.create()
                         .withSubject(profil.getUsername())

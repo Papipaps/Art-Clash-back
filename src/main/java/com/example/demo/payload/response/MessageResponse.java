@@ -1,17 +1,16 @@
 package com.example.demo.payload.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MessageResponse {
+
+	private boolean hasError;
 	private String message;
-
-	public MessageResponse(String message) {
-	    this.message = message;
-	  }
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
 }

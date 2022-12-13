@@ -1,73 +1,29 @@
 package com.example.demo.model.data;
 
+import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.persistence.Id;
+import java.io.InputStream;
+import java.time.LocalDate;
+
 @Document
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Media {
+    @Id
 private String id;
-private byte[] content;
+private String filePath;
 private String filename;
 private String fileType;
+private InputStream stream;
 private long fileSize;
 private String ownerId;
 private String tag;
+private String thumbnailPath;
+private LocalDate createdDate;
 
-    public Media() {
-    }
-
-    public String getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(String ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public long getFileSize() {
-        return fileSize;
-    }
-
-    public void setFileSize(long fileSize) {
-        this.fileSize = fileSize;
-    }
-
-    public String getFileType() {
-        return fileType;
-    }
-
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public byte[] getContent() {
-        return content;
-    }
-
-    public void setContent(byte[] content) {
-        this.content = content;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
 }
