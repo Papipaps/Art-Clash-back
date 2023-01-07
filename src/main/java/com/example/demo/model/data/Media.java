@@ -1,16 +1,15 @@
 package com.example.demo.model.data;
 
 import lombok.*;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.Id;
 import java.io.InputStream;
 import java.time.LocalDate;
 
 @Document
 @Builder
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Media {

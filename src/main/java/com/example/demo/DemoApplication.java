@@ -43,40 +43,25 @@ public class DemoApplication {
     }
 
     @Bean
-    CommandLineRunner run(RoleRepository roleRepository, ProfileRepository profilRepository, ProfileRepository profileRepository, AuthController profilService, RoleService roleService , CommentRepository commentRepository, PostRepository postRepository) throws Exception {
+    CommandLineRunner run(RoleRepository roleRepository, ProfileRepository profilRepository, ProfileRepository profileRepository, AuthController profilService, RoleService roleService, CommentRepository commentRepository, PostRepository postRepository) throws Exception {
         return args -> {
-            if (roleRepository.findByName("ROLE_ADMIN").isEmpty()){
-           roleService.saveRole(new Role(ERole.ROLE_ADMIN.name()));
+            if (roleRepository.findByName("ROLE_ADMIN").isEmpty()) {
+                roleService.saveRole(new Role(ERole.ROLE_ADMIN.name()));
             }
-            if (roleRepository.findByName("ROLE_USER").isEmpty()){
-           roleService.saveRole(new Role(ERole.ROLE_USER.name()));
+            if (roleRepository.findByName("ROLE_USER").isEmpty()) {
+                roleService.saveRole(new Role(ERole.ROLE_USER.name()));
             }
-           if (!profilRepository.existsByUsername("admin")){
+            if (!profilRepository.existsByUsername("admin")) {
 
-           SignupRequest adminRequest = new SignupRequest();
-           adminRequest.setFirstname("firstname");
-           adminRequest.setLastname("lastname");
-           adminRequest.setEmail("admin@mail.fr");
-           adminRequest.setUsername("admin");
-           adminRequest.setPassword("password");
-           profilService.registerUser(adminRequest);
-           roleService.addRoleToUser("admin", ERole.ROLE_ADMIN.name());
-           }
-            Optional<Profile> jojo = profileRepository.findByUsername("jojo");
-            if (!jojo.isPresent()){
-                profileRepository.save(Profile.builder().username("jojo").email("jojo@yopmail.com").build());
-            }else{
-                profileRepository.deleteById(jojo.get().getId());
-                profileRepository.save(Profile.builder().username("jojo").email("jojo@yopmail.com").build());
+                SignupRequest adminRequest = new SignupRequest();
+                adminRequest.setFirstname("firstname");
+                adminRequest.setLastname("lastname");
+                adminRequest.setEmail("admin@mail.fr");
+                adminRequest.setUsername("admin");
+                adminRequest.setPassword("password");
+                profilService.registerUser(adminRequest);
+                roleService.addRoleToUser("admin", ERole.ROLE_ADMIN.name());
             }
-           //roleService.addRoleToUser("user", ERole.ROLE_USER.name());
-
-
-           //Post post = postRepository.save(new Post(null, 3L, "Firtname Lastname", "TITRE", "DESCRIPTION", false, false, new Date()));
-           //Comment comment = commentRepository.save(new Comment(3L, "Firtname Lastname", "Je suis un commentaire", new Date(),post));
-           //Comment comment2 = commentRepository.save(new Comment(3L, "Firtname Lastname", "Je suis un commentaire", new Date(),post));
-           //Comment comment3 = commentRepository.save(new Comment(3L, "Firtname Lastname", "Je suis un commentaire", new Date(),post));
-
         };
     }
 
