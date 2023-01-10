@@ -8,11 +8,15 @@ import java.io.IOException;
 import java.util.List;
 
 public interface MediaService {
-    public byte[] downloadImageFromFileSystem(String id) throws IOException;
-    public List<String> downloadAllMediaByOwner(String id, Pageable pageable) throws IOException;
-    public MediaDTO downloadMediaByOwner(String id) throws IOException;
+    byte[] downloadImageFromFileSystem(String id) throws IOException;
 
-    public String uploadImageToFileSystem(MultipartFile file,String ownerId) throws IOException;
+    MediaDTO downloadMediafromDB(String id) throws IOException;
+
+    String uploadImageToFileSystem(MultipartFile file, String ownerId) throws IOException;
+
+    String uploadImageToDB(MultipartFile file, String ownerId) throws IOException;
+
+    List<String> downloadAllMediaByOwner(String id, Pageable pageable) throws IOException;
 
 
     byte[] getThumbmail(String id);

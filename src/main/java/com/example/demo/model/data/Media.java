@@ -18,7 +18,7 @@ private String id;
 private String filePath;
 private String filename;
 private String fileType;
-private InputStream stream;
+private byte[] content;
 private long fileSize;
 private String ownerId;
 private String tag;

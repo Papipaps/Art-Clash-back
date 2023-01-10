@@ -49,7 +49,7 @@ public class AuthController {
     private RoleService roleService;
 
 
-    @PostMapping("/signup")
+    @PostMapping("/register")
     public ProfilDTO registerUser(@RequestBody SignupRequest signUpRequest) {
         if (profilRepository.existsByUsername(signUpRequest.getUsername())) {
             throw new UsernameNotFoundException("Username already exists");

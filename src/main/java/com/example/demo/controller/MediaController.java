@@ -29,6 +29,13 @@ public class MediaController {
         String uploadImage = mediaService.uploadImageToFileSystem(file,username);
         return ResponseEntity.status(HttpStatus.CREATED).body(uploadImage);
     }
+    @PostMapping("uploadToDB")
+    public ResponseEntity<?> uploadImageToDB(@RequestBody MultipartFile file) throws IOException {
+        Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
+        String username = loggedInUser.getName();
+        String uploadImage = mediaService.uploadImageToDB(file,username);
+        return ResponseEntity.status(HttpStatus.CREATED).body(uploadImage);
+    }
 
     @GetMapping("download/{id}")
     public ResponseEntity<?> downloadImageFromFileSystem(@PathVariable String id) throws IOException {
@@ -36,9 +43,9 @@ public class MediaController {
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(imageData);
 
     }
-    @GetMapping("downloadByOwner/{ownerId}")
-    public ResponseEntity<?> downloadImageFromFileSystemOwner(@PathVariable String ownerId) throws IOException {
-        MediaDTO imageData = mediaService.downloadMediaByOwner(ownerId);
+    @GetMapping("downloadFromDB/{id}")
+    public ResponseEntity<?> downloadImageFromDB(@PathVariable String id) throws IOException {
+        MediaDTO imageData = mediaService.downloadMediafromDB(id);
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(imageData);
 
     }

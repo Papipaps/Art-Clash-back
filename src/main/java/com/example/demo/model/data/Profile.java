@@ -38,7 +38,6 @@ public class Profile {
     @Size(max = 120)
     private String password;
 
-    @DBRef(db = "roles")
     private List<Role> roles = new ArrayList<>();
 
     private String firstname;
