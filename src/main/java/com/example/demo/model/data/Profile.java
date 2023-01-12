@@ -41,6 +41,9 @@ public class Profile {
     private List<Role> roles = new ArrayList<>();
 
     private String firstname;
+
+    private String backgroundId;
+    private String avatarId;
     private String lastname;
 
     private String category;

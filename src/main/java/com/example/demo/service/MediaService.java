@@ -10,7 +10,7 @@ import java.util.List;
 public interface MediaService {
     byte[] downloadImageFromFileSystem(String id) throws IOException;
 
-    MediaDTO downloadMediafromDB(String id) throws IOException;
+    MediaDTO downloadMediaMetadata(String id) throws IOException;
 
     String uploadImageToFileSystem(MultipartFile file, String ownerId) throws IOException;
 

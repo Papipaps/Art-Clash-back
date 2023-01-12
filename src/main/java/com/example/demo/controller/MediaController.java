@@ -43,10 +43,10 @@ public class MediaController {
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(imageData);
 
     }
-    @GetMapping("downloadFromDB/{id}")
+    @GetMapping("downloadMetadata/{id}")
     public ResponseEntity<?> downloadImageFromDB(@PathVariable String id) throws IOException {
-        MediaDTO imageData = mediaService.downloadMediafromDB(id);
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(imageData);
+        MediaDTO imageData = mediaService.downloadMediaMetadata(id);
+        return ResponseEntity.status(HttpStatus.OK).body(imageData);
 
     }
 

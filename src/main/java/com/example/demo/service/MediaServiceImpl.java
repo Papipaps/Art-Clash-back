@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Service
 
 public class MediaServiceImpl implements MediaService {
-    private final String FOLDER_PATH = "src/main/resources/media/";
+    private final String FOLDER_PATH = "D:/Images/Dessin/artclash/";
     @Autowired
     private MediaRepository fileDataRepository;
 
@@ -45,23 +45,19 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public MediaDTO downloadMediafromDB(String id) throws IOException {
+    public MediaDTO downloadMediaMetadata(String id) throws IOException {
         Media media = fileDataRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("No media found"));
-        return new MediaDTO(media.getId(), media.getOwnerId(), media.getContent(), media.getCreatedDate());
+        return MediaDTO.builder()
+                .id(media.getId())
+                .ownerId(media.getOwnerId())
+                .createdDate(media.getCreatedDate())
+                .build();
     }
 
     @Override
     public List<String> downloadAllMediaByOwner(String ownerId, Pageable pageable) throws IOException {
         Profile profil = profilRepository.findById(ownerId).get();
         return fileDataRepository.findAllByOwnerId(profil.getId(), pageable).stream().map(Media::getId).collect(Collectors.toList());
-        //List<Media> mediaIdList = fileDataRepository.findAllByOwnerId(profil.getId(), pageable);
-        //List<MediaDTO> medias = new ArrayList<>();
-        //mediaIdList.forEach(media -> {
-        //    byte[] image = getThumbmail(media.getId());
-        //    MediaDTO mediaDTO = new MediaDTO(media.getId(), profil.getId(), image,media.getCreatedDate());
-        //    medias.add(mediaDTO);
-        //});
-        //return new PageImpl<>(medias,pageable , medias.size());
     }
 
     @Override
@@ -69,7 +65,7 @@ public class MediaServiceImpl implements MediaService {
         Media media = fileDataRepository.findById(id).get();
         File file = new File(media.getFilePath());
         Path path = Paths.get(media.getFilePath()).getParent().getParent();
-        String thumbnailPath = path +"/thumbnail/"+"thumbnail_" + media.getFilename().replace("\\", "/");
+        String thumbnailPath = path + "/thumbnail/" + "thumbnail_" + media.getFilename().replace("\\", "/");
         File thumbnailFile = new File(thumbnailPath);
         media.setThumbnailPath(thumbnailPath);
         try {
@@ -81,8 +77,8 @@ public class MediaServiceImpl implements MediaService {
 
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException("erekrfze");
         }
-        throw new RuntimeException("erekrfze");
     }
 
     @Override
@@ -117,10 +113,11 @@ public class MediaServiceImpl implements MediaService {
 
         String s = (UUID.randomUUID().toString().replace("-", "").substring(0, 15) + file.getOriginalFilename().toLowerCase().replaceAll("[^a-zA-Z0-9.]", ""));
 
+        byte[] mediaContent = file.getBytes();
         Media save = fileDataRepository.save(Media.builder()
                 .filename(s)
                 .fileType(file.getContentType())
-                .content(file.getBytes())
+                .content(mediaContent)
                 .createdDate(LocalDate.now())
                 .ownerId(profil.getId())
                 .build());
@@ -151,8 +148,8 @@ public class MediaServiceImpl implements MediaService {
         try {
             File outputFile = new File(filePath);
             outputFile.getParentFile().mkdirs(); // Will create parent directories if not exists
-            outputFile.createNewFile();
             file.transferTo(outputFile);
+            Thumbnails.of(outputFile).size(1000,1000).toFile(outputFile);
 
         } catch (Exception exception) {
             fileDataRepository.deleteById(save.getId());

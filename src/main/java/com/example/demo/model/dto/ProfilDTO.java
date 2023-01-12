@@ -20,7 +20,8 @@ public class ProfilDTO extends BaseDTO {
     private String firstname;
     private String lastname;
     private String username;
-
+    private String backgroundId;
+    private String avatarId;
     private String description;
     private String gender;
     private String email;
