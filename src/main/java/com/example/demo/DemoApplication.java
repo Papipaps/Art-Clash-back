@@ -12,11 +12,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +46,7 @@ public class DemoApplication {
     }
 
     @Bean
-    CommandLineRunner run(RoleRepository roleRepository, ProfileRepository profilRepository, ProfileRepository profileRepository, AuthController profilService, RoleService roleService, CommentRepository commentRepository, PostRepository postRepository) throws Exception {
+    CommandLineRunner run(PasswordEncoder passwordEncoder, RoleRepository roleRepository, ProfileRepository profilRepository, AuthController profilService, RoleService roleService, CommentRepository commentRepository, PostRepository postRepository) throws Exception {
         return args -> {
             if (roleRepository.findByName("ROLE_ADMIN").isEmpty()) {
                 roleService.saveRole(new Role(ERole.ROLE_ADMIN.name()));
@@ -62,6 +64,18 @@ public class DemoApplication {
                 adminRequest.setPassword("password");
                 profilService.registerUser(adminRequest);
                 roleService.addRoleToUser("admin", ERole.ROLE_ADMIN.name());
+            }
+            for (int i = 0; i < 10 ; i++) {
+                if(!profilRepository.existsByUsername("dummy"+i))
+                    profilRepository.save(
+                                Profile.builder()
+                                        .email("dummy"+i+"@yopmail.com")
+                                        .createdDate(new Date())
+                                        .firstname("first"+i)
+                                        .lastname("last"+i)
+                                        .username("dummy"+i)
+                                        .password(passwordEncoder.encode("password"))
+                                        .build());
             }
         };
     }

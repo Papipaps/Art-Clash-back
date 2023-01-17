@@ -43,10 +43,15 @@ public class ProfilController {
     //}
 
     @GetMapping(path = "getProfilInformation")
-    ProfilDTO getProfil(@RequestParam(required = false) String username) {
+    ProfilDTO getCurrentProfilInfo(@RequestParam(required = false) String username) {
         Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
         username = username == null || username.isBlank() ? loggedInUser.getName() : username;
-        return profilService.getProfil(username);
+        return profilService.getProfil(username,true);
+    }
+    @GetMapping(path = "getProfil/{id}")
+    ProfilDTO getProfil(@RequestParam(required = false) String id) {
+        Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
+        return profilService.getProfil(id,false);
     }
 
     @GetMapping(path = "getPublicInformation")

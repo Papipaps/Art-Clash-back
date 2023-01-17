@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 
 @Document
 @Builder
@@ -18,10 +19,8 @@ public class Relationship {
 
     @Id
     private String id;
-    //@DBRef(db = "profil")
-    private String userId;
-    //@DBRef(db = "profil")
-    private String followerId;
+    private String followed;
+    private String follower;
     private Date createdAt;
     private Date updatedAt;
     private String state;

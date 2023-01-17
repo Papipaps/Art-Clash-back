@@ -1,26 +1,32 @@
 package com.example.demo.service;
 
 import com.example.demo.model.data.Media;
+import com.example.demo.model.data.Post;
 import com.example.demo.model.data.Profile;
 import com.example.demo.model.dto.MediaDTO;
+import com.example.demo.payload.response.MessageResponse;
 import com.example.demo.repository.MediaRepository;
+import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.ProfileRepository;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,7 +35,10 @@ import java.util.stream.Collectors;
 @Service
 
 public class MediaServiceImpl implements MediaService {
-    private final String FOLDER_PATH = "D:/Images/Dessin/artclash/";
+    private final String FOLDER_PATH = Paths.get("").toAbsolutePath().getParent().toString().concat("\\storage\\media\\");
+
+    @Autowired
+    private PostRepository postRepository;
     @Autowired
     private MediaRepository fileDataRepository;
 
@@ -43,6 +52,14 @@ public class MediaServiceImpl implements MediaService {
         byte[] image = Files.readAllBytes(new File(filePath).toPath());
         return image;
     }
+    @Override
+    public ResponseEntity<byte[]> downloadImageFromDB(String id) throws IOException {
+        Optional<Media> fileData = fileDataRepository.findById(id);
+        byte[] imageData = fileData.get().getContent();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        return new ResponseEntity<>(imageData, headers, HttpStatus.OK);
+    }
 
     @Override
     public MediaDTO downloadMediaMetadata(String id) throws IOException {
@@ -55,7 +72,7 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public List<String> downloadAllMediaByOwner(String ownerId, Pageable pageable) throws IOException {
+    public List<String> downloadAllMediaIdByOwner(String ownerId, Pageable pageable) throws IOException {
         Profile profil = profilRepository.findById(ownerId).get();
         return fileDataRepository.findAllByOwnerId(profil.getId(), pageable).stream().map(Media::getId).collect(Collectors.toList());
     }
@@ -103,25 +120,54 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public String uploadImageToDB(MultipartFile file, String ownerId) throws IOException {
+    public ResponseEntity<?> uploadImageToDB(MultipartFile file, String loggedUsername) throws IOException {
+
+        Profile profil = profilRepository.findByUsername(loggedUsername).get();
+
+        if(fileDataRepository.countAllByOwnerId(profil.getId())>=10){
+            return ResponseEntity.status(HttpStatus.OK).body(MessageResponse.builder().message("Can't upload more than 10 images.").hasError(true).build());
+        }
 
         if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
             throw new RuntimeException("");
         }
+        if (file.getContentType() == null || file.getContentType().isEmpty()) {
+            throw new RuntimeException("");
+        }
 
-        Profile profil = profilRepository.findByUsername(ownerId).get();
+        String s = UUID.randomUUID().toString().concat("." + file.getContentType().split("/")[1]);
 
-        String s = (UUID.randomUUID().toString().replace("-", "").substring(0, 15) + file.getOriginalFilename().toLowerCase().replaceAll("[^a-zA-Z0-9.]", ""));
+        // Get the input stream for the file
+        InputStream inputStream = file.getInputStream();
 
-        byte[] mediaContent = file.getBytes();
+        // Get the output stream for the new JPEG image
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        // Create a Thumbnails object and set the output format to JPEG
+        Thumbnails.of(inputStream)
+                .size(700,700)
+                .outputFormat("jpg")
+                .toOutputStream(outputStream);
+
+// Get the JPEG image data as a byte array
+        byte[] imageData = outputStream.toByteArray();
+
         Media save = fileDataRepository.save(Media.builder()
                 .filename(s)
                 .fileType(file.getContentType())
-                .content(mediaContent)
+                .content(imageData)
                 .createdDate(LocalDate.now())
                 .ownerId(profil.getId())
+                .fileSize(file.getSize())
                 .build());
-        return "file uploaded successfully !";
+
+        postRepository.save(Post.builder()
+                        .title("IMAGE")
+                .media(save)
+                .isDraft(true)
+                .createdDate(LocalDateTime.now())
+                .ownerId(profil.getId()).build());
+        return ResponseEntity.status(HttpStatus.CREATED).body("file uploaded successfully with id : "+save.getId());
 
     }
 
@@ -135,21 +181,22 @@ public class MediaServiceImpl implements MediaService {
 
         Profile profil = profilRepository.findByUsername(ownerId).get();
 
-        String s = (UUID.randomUUID().toString().replace("-", "").substring(0, 15) + file.getOriginalFilename().toLowerCase().replaceAll("[^a-zA-Z0-9.]", ""));
-        String filePath = FOLDER_PATH + profil.getId() + "/storage/" + s;
-
         Media save = fileDataRepository.save(Media.builder()
-                .filename(s)
                 .fileType(file.getContentType())
-                .filePath(filePath)
                 .createdDate(LocalDate.now())
                 .ownerId(profil.getId())
                 .build());
+        String s = UUID.randomUUID().toString().concat("." + save.getFileType().split("/")[1]);
+        save.setFilename(s);
+        String filePath = FOLDER_PATH + profil.getId() + File.separator + s;
+        save.setFilePath(filePath);
+        fileDataRepository.save(save);
+
         try {
             File outputFile = new File(filePath);
             outputFile.getParentFile().mkdirs(); // Will create parent directories if not exists
             file.transferTo(outputFile);
-            Thumbnails.of(outputFile).size(1000,1000).toFile(outputFile);
+            Thumbnails.of(outputFile).size(1000, 1000).toFile(outputFile);
 
         } catch (Exception exception) {
             fileDataRepository.deleteById(save.getId());

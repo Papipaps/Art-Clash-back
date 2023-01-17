@@ -1,46 +1,57 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.data.Comment;
+import com.example.demo.model.data.Post;
 import com.example.demo.model.dto.CommentDTO;
 import com.example.demo.model.dto.PostDTO;
-import com.example.demo.repository.CommentRepository;
-import com.example.demo.repository.PostRepository;
-import com.example.demo.utils.mapper.CommentMapper;
-import com.example.demo.utils.mapper.PostMapper;
+import com.example.demo.service.CommentService;
+import com.example.demo.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/comment")
+@RequestMapping("/api/post")
 public class CommentController {
     @Autowired
-    CommentRepository commentRepository;
-@Autowired
-PostRepository postRepository;
-
-@Autowired
-    PostMapper postMapper;
+    CommentService commentService;
     @Autowired
-    CommentMapper commentMapper;
+    PostService postService;
 
-    @GetMapping("/getListbyId")
-    public Page<CommentDTO> getComments(@RequestParam("postId") String id, @RequestParam(value = "size", defaultValue = "9") int size, @RequestParam(value = "page", defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Comment> allByPostId = commentRepository.findAllByPostId(id, pageable);
-        List<CommentDTO> commentDTOList = commentMapper.toDTOs(allByPostId.getContent());
-        return new PageImpl<>(commentDTOList, pageable, commentDTOList.size());
+    @PostMapping("add")
+    public PostDTO addPost(@RequestBody PostDTO postDTO) {
+        Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
+        String username = loggedInUser.getName();
+        return postService.addPost(username,postDTO);
     }
-    @GetMapping("/")
-    public List<PostDTO> getComment( ) {
+    @PostMapping("comment/add")
+    public CommentDTO addComment(@RequestBody CommentDTO commentDTO) {
+        Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
+        String username = loggedInUser.getName();
+        return commentService.addComment(username,commentDTO);
+    }
 
-    return postMapper.toDTOs(postRepository.findAll());}
+    @GetMapping("get/{postId}")
+    public PostDTO getPost(@PathVariable String postId) {
+        return postService.getPost(postId);
+    }
+    @DeleteMapping("delete/{postId}")
+    public PostDTO deletePost(@PathVariable String postId) {
+        return postService.deletePost(postId);
+    }
+    @GetMapping("listComment/{postId}")
+    public Page<CommentDTO> getComments(@PathVariable("postId") String postId,
+                                        @RequestParam(required = false, value = "size", defaultValue = "9") int size,
+                                        @RequestParam(required = false, value = "page", defaultValue = "0") int page) {
+        return commentService.getCommentsByPost(postId, PageRequest.of(page, size));
+    }
+    @GetMapping("listAllByUser/{ownerId}")
+    public Page<PostDTO> getAllPost(@PathVariable("ownerId") String ownerId,
+                                 @RequestParam(required = false, value = "size", defaultValue = "9") int size,
+                                 @RequestParam(required = false, value = "page", defaultValue = "0") int page) {
+
+        return postService.getAllByOwnerId(ownerId, PageRequest.of(page, size));
+    }
 }

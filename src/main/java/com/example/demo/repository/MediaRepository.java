@@ -11,4 +11,6 @@ public interface MediaRepository extends MongoRepository<Media,String> {
     List<Media> findAllByOwnerId(String id, Pageable pageable);
     Optional<Media> findByOwnerId(String id);
     Optional<Media> findByFilename(String name);
+
+    int countAllByOwnerId(String id);
 }

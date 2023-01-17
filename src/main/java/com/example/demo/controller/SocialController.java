@@ -23,7 +23,7 @@ public class SocialController {
     @Autowired
     private RelationshipService relationshipService;
 
-    @PatchMapping("follow")
+    @PostMapping("follow")
     private ResponseEntity<?> followProfil(@RequestParam String userId){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -31,7 +31,7 @@ public class SocialController {
         return ResponseEntity.status(HttpStatus.OK).body(payload);
     }
 
-    @PatchMapping("followed")
+    @PatchMapping("unfollow")
     private ResponseEntity<?> unfollowProfil(@RequestParam String userId){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -40,7 +40,7 @@ public class SocialController {
     }
 
     @GetMapping("followers/{userId}")
-    private ResponseEntity<?> getFollowers(@RequestParam String userId,
+    private ResponseEntity<?> getFollowers(@PathVariable String userId,
                                            @RequestParam(required = false,defaultValue = "9") int size,
                                            @RequestParam(required = false,defaultValue = "0") int page){
          Page<ProfilDTO> followers =  socialService.getFollowers(userId, PageRequest.of(page,size));

@@ -33,8 +33,7 @@ public class MediaController {
     public ResponseEntity<?> uploadImageToDB(@RequestBody MultipartFile file) throws IOException {
         Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
         String username = loggedInUser.getName();
-        String uploadImage = mediaService.uploadImageToDB(file,username);
-        return ResponseEntity.status(HttpStatus.CREATED).body(uploadImage);
+        return mediaService.uploadImageToDB(file,username);
     }
 
     @GetMapping("download/{id}")
@@ -43,8 +42,13 @@ public class MediaController {
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(imageData);
 
     }
-    @GetMapping("downloadMetadata/{id}")
+    @GetMapping("downloadFromDB/{id}")
     public ResponseEntity<?> downloadImageFromDB(@PathVariable String id) throws IOException {
+        return mediaService.downloadImageFromDB(id);
+
+    }
+    @GetMapping("downloadMetadata/{id}")
+    public ResponseEntity<?> downloadImageMetaData(@PathVariable String id) throws IOException {
         MediaDTO imageData = mediaService.downloadMediaMetadata(id);
         return ResponseEntity.status(HttpStatus.OK).body(imageData);
 
@@ -52,7 +56,7 @@ public class MediaController {
 
     @GetMapping("downloadAllByOwner/{ownerId}")
     public ResponseEntity<?> downloadAllByOwner(@PathVariable String ownerId, @RequestParam(defaultValue = "0",required = false) int page,@RequestParam(defaultValue = "9",required = false)int size) throws IOException {
-        var imageData = mediaService.downloadAllMediaByOwner(ownerId, PageRequest.of(page, size));
+        var imageData = mediaService.downloadAllMediaIdByOwner(ownerId, PageRequest.of(page, size));
         return ResponseEntity.status(HttpStatus.OK).body(imageData);
 
     }

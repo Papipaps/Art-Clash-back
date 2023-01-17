@@ -6,6 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface CommentRepository extends MongoRepository<Comment,String> {
-    Comment findByOwnerId(String ownerId);
+    Page<Comment> findByOwnerId(String ownerId, Pageable pageable);
     Page<Comment> findAllByPostId(String id, Pageable pageable);
 }

@@ -33,20 +33,20 @@ public class SocialServiceImpl implements SocialService {
     @Override
     @Transactional
     public MessageResponse followProfil(String loggedUsername, String userId) {
-        boolean res =false;
+        boolean res = false;
         String message;
-        Profile profil = profilRepository.findByUsername(loggedUsername).get();
-        Optional<Relationship> optRelationship = relationshipRepository.findByUserIdAndFollowerId(profil.getId(),userId);
+        Profile loggedProfile = profilRepository.findByUsername(loggedUsername).get();
+        Optional<Relationship> optRelationship = relationshipRepository.findByFollowedAndFollower(loggedProfile.getId(),userId);
 
-        if (!optRelationship.isPresent()){
+        if (optRelationship.isEmpty()){
             Relationship relationship = Relationship.builder()
-                    .userId(profil.getId())
-                    .followerId(userId)
+                    .followed(loggedProfile.getId())
+                    .follower(userId)
                     .createdAt(new Date())
-                    .state("ONGOING")
+                    .state("FOLLOWED")
                     .build();
             relationshipRepository.save(relationship);
-            message="Profile successfully unfollowed.";
+            message="Profile successfully followed.";
         }else{
             message="You are not following this profile";
             //message="The profile you are trying to follow doesn't exist";
@@ -64,11 +64,12 @@ public class SocialServiceImpl implements SocialService {
         boolean res =false;
         String message;
 
-        Profile loggedProfil = profilRepository.findByUsername(loggedUsername).get();
-        Optional<Relationship> optRelationship = relationshipRepository.findByUserIdAndFollowerId(loggedProfil.getId(),userId);
+        Profile loggedProfile = profilRepository.findByUsername(loggedUsername).get();
+        Optional<Relationship> optRelationship = relationshipRepository.findByFollowedAndFollower(loggedProfile.getId(),userId);
         
         if (optRelationship.isPresent()){
             Relationship relationship = optRelationship.get();
+            relationship.setUpdatedAt(new Date());
             relationship.setState("UNFOLLOWED");
             message="Profile successfully unfollowed.";
         }else{
@@ -83,18 +84,24 @@ public class SocialServiceImpl implements SocialService {
 
     @Override
     public Page<ProfilDTO> getFollowers(String userId, Pageable pageable) {
+
         Optional<Profile> optProfil = profilRepository.findById(userId);
+
         if (optProfil.isPresent()) {
-            List<ProfilDTO> profilDTOS = new ArrayList<>();
+
             Profile profil = optProfil.get();
-            Page<String> followersId = relationshipRepository.findAllByUserId(profil.getId(), pageable);
-            followersId.stream().forEach(id -> {
+            Page<Relationship> relationshipsPage = relationshipRepository.findAllByFollowed(profil.getId(), pageable);
+
+            List<ProfilDTO> profilDTOS = new ArrayList<>();
+            relationshipsPage.getContent().stream().map(Relationship::getFollower).forEach(id -> {
                 Optional<Profile> p = profilRepository.findById(id);
                 p.ifPresent(value -> profilDTOS.add(profilMapper.profilEntityToDTO(value)));
             });
 
         return new PageImpl<>(profilDTOS,pageable,profilDTOS.size());
+
         }
+
         return null;
     }
 }
