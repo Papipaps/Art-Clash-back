@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.jojo</groupId>
-	<artifactId>Artclash</artifactId>
+	<artifactId>artclash-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Artclash</name>
+	<name>artclash-service</name>
 	<description>L&apos;appli web pour artist</description>
 	<properties>
 		<java.version>11</java.version>
@@ -21,6 +21,13 @@
 		<version.mapstruct>1.4.2.Final</version.mapstruct>
 		<version.mapstruct-lombok>0.2.0</version.mapstruct-lombok>
 	</properties>
+	<distributionManagement>
+		<repository>
+			<id>Art-Clash-back </id>
+			<url>https://github.com/Papipaps/Art-Clash-back.git</url>
+		</repository>
+	</distributionManagement>
+
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
