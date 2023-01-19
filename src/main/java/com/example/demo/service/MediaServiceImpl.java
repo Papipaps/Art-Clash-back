@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @Service
 
 public class MediaServiceImpl implements MediaService {
-    private final String FOLDER_PATH = Paths.get("").toAbsolutePath().getParent().toString().concat("\\storage\\media\\");
+    //private final String FOLDER_PATH = Paths.get("").toAbsolutePath().getParent().toString().concat("\\storage\\media\\");
 
     @Autowired
     private PostRepository postRepository;
@@ -173,40 +173,40 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public String uploadImageToFileSystem(MultipartFile file, String ownerId) throws IOException {
+return "";
+   //    initDir();
+   //    if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
+   //        throw new RuntimeException("");
+   //    }
 
-        initDir();
-        if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
-            throw new RuntimeException("");
-        }
+   //    Profile profil = profilRepository.findByUsername(ownerId).get();
 
-        Profile profil = profilRepository.findByUsername(ownerId).get();
+   //    Media save = fileDataRepository.save(Media.builder()
+   //            .fileType(file.getContentType())
+   //            .createdDate(LocalDate.now())
+   //            .ownerId(profil.getId())
+   //            .build());
+   //    String s = UUID.randomUUID().toString().concat("." + save.getFileType().split("/")[1]);
+   //    save.setFilename(s);
+   //    String filePath = FOLDER_PATH + profil.getId() + File.separator + s;
+   //    save.setFilePath(filePath);
+   //    fileDataRepository.save(save);
 
-        Media save = fileDataRepository.save(Media.builder()
-                .fileType(file.getContentType())
-                .createdDate(LocalDate.now())
-                .ownerId(profil.getId())
-                .build());
-        String s = UUID.randomUUID().toString().concat("." + save.getFileType().split("/")[1]);
-        save.setFilename(s);
-        String filePath = FOLDER_PATH + profil.getId() + File.separator + s;
-        save.setFilePath(filePath);
-        fileDataRepository.save(save);
+   //    try {
+   //        File outputFile = new File(filePath);
+   //        outputFile.getParentFile().mkdirs(); // Will create parent directories if not exists
+   //        file.transferTo(outputFile);
+   //        Thumbnails.of(outputFile).size(1000, 1000).toFile(outputFile);
 
-        try {
-            File outputFile = new File(filePath);
-            outputFile.getParentFile().mkdirs(); // Will create parent directories if not exists
-            file.transferTo(outputFile);
-            Thumbnails.of(outputFile).size(1000, 1000).toFile(outputFile);
+   //    } catch (Exception exception) {
+   //        fileDataRepository.deleteById(save.getId());
+   //        exception.printStackTrace();
+   //    }
 
-        } catch (Exception exception) {
-            fileDataRepository.deleteById(save.getId());
-            exception.printStackTrace();
-        }
-
-        return "file uploaded successfully : " + filePath;
+   //    return "file uploaded successfully : " + filePath;
     }
 
     private void initDir() throws IOException {
-        Files.createDirectories(Paths.get(FOLDER_PATH));
+    //    Files.createDirectories(Paths.get(FOLDER_PATH));
     }
 }
