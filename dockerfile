@@ -1,12 +1,11 @@
 FROM openjdk:11
 
-RUN mkdir -p /app/target
-
 WORKDIR /app
 
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} /app/target/app.jar
+COPY . .
 
-VOLUME /app/target
+RUN mvn clean package
 
-CMD ["java", "-jar", "/app/target/app.jar"]
+EXPOSE 8080
+
+CMD ["java", "-jar", "target/app.jar"]
