@@ -8,4 +8,4 @@ COPY . .
 
 VOLUME /app/target
 
-CMD ["java", "-jar", "target/app.jar"]
+CMD ["java", "-jar", "artclash-service-0.0.1-SNAPSHOT.jar"]
