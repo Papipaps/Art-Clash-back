@@ -9,4 +9,4 @@ COPY ${JAR_FILE} /app/target/app.jar
 
 VOLUME /app/target
 
-CMD ["java", "-jar", "target/app.jar"]
+CMD ["java", "-jar", "/app/target/app.jar"]
