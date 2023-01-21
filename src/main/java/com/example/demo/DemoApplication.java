@@ -26,7 +26,6 @@ import java.util.Optional;
 @SpringBootApplication
 @EnableMongoRepositories(basePackages = "com.example.demo.repository")
 public class DemoApplication {
-    final java.lang.String LOCAL_HOST_URL = "http://127.0.0.1:3000/";
 
     public static void main(java.lang.String[] args) {
         SpringApplication.run(DemoApplication.class, args);
@@ -35,11 +34,7 @@ public class DemoApplication {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000",
-                "3.75.158.163",
-                "3.125.183.140",
-                "35.157.117.28",
-                "https://artclash-service.onrender.com"));
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("HEAD",
                 "GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowCredentials(true);
