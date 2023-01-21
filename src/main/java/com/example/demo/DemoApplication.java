@@ -34,7 +34,12 @@ public class DemoApplication {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOrigins(List.of(
+                "https://100.20.92.101",
+                "https://44.225.181.72",
+                "https://44.227.217.144",
+                "https://art-clash.onrender.com/",
+                "http://localhost:3000/"));
         configuration.setAllowedMethods(List.of("HEAD",
                 "GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowCredentials(true);
