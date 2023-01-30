@@ -21,18 +21,14 @@ public class Post {
     private String id;
     private String ownerId;
     private String ownerFullname;
-    @DBRef(db = "media")
-    @Field("media")
-    private Media media;
-
-    @DBRef(db = "comments")
-    private List<Comment> comments;
-
+    private String mediaId;
     private String title;
     private String content;
     private Boolean anonymous;
     private Boolean isDraft;
     private LocalDateTime createdDate;
+    private int likes;
+    private Boolean resolved;
 
 
 }

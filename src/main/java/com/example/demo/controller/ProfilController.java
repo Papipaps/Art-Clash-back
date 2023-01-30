@@ -13,7 +13,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/profil")
-public class ProfilController {
+//@Api(value = "Profile Controller")
+ public class ProfilController {
 
     @Autowired
     ProfilService profilService;
@@ -23,6 +24,7 @@ public class ProfilController {
 
 
     @GetMapping
+//    @ApiOperation(value = "Example endpoint", notes = "This endpoint is for demonstration purposes")
     public String hello(){
         return "hello";
     }

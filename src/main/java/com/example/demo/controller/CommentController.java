@@ -47,11 +47,18 @@ public class CommentController {
                                         @RequestParam(required = false, value = "page", defaultValue = "0") int page) {
         return commentService.getCommentsByPost(postId, PageRequest.of(page, size));
     }
-    @GetMapping("listAllByUser/{ownerId}")
+    @GetMapping("getPosts/{ownerId}")
     public Page<PostDTO> getAllPost(@PathVariable("ownerId") String ownerId,
                                  @RequestParam(required = false, value = "size", defaultValue = "9") int size,
                                  @RequestParam(required = false, value = "page", defaultValue = "0") int page) {
 
-        return postService.getAllByOwnerId(ownerId, PageRequest.of(page, size));
+        return postService.getAllByOwnerId(ownerId, PageRequest.of(page, size), false);
+    }
+    @GetMapping("getMediaPosts/{ownerId}")
+    public Page<PostDTO> getAllMediaPost(@PathVariable("ownerId") String ownerId,
+                                 @RequestParam(required = false, value = "size", defaultValue = "9") int size,
+                                 @RequestParam(required = false, value = "page", defaultValue = "0") int page) {
+
+        return postService.getAllByOwnerId(ownerId, PageRequest.of(page, size), true);
     }
 }

@@ -8,10 +8,10 @@ import com.example.demo.payload.response.MessageResponse;
 import com.example.demo.repository.MediaRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.ProfileRepository;
+import com.example.demo.utils.mapper.PostMapper;
 import net.coobird.thumbnailator.Thumbnails;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,11 +26,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 
@@ -52,6 +49,7 @@ public class MediaServiceImpl implements MediaService {
         byte[] image = Files.readAllBytes(new File(filePath).toPath());
         return image;
     }
+
     @Override
     public ResponseEntity<byte[]> downloadImageFromDB(String id) throws IOException {
         Optional<Media> fileData = fileDataRepository.findById(id);
@@ -72,9 +70,9 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public List<String> downloadAllMediaIdByOwner(String ownerId, Pageable pageable) throws IOException {
+    public Page<Media> downloadAllMediaIdByOwner(String ownerId, Pageable pageable) throws IOException {
         Profile profil = profilRepository.findById(ownerId).get();
-        return fileDataRepository.findAllByOwnerId(profil.getId(), pageable).stream().map(Media::getId).collect(Collectors.toList());
+        return fileDataRepository.findAllByOwnerId(profil.getId(), pageable);
     }
 
     @Override
@@ -124,8 +122,8 @@ public class MediaServiceImpl implements MediaService {
 
         Profile profil = profilRepository.findByUsername(loggedUsername).get();
 
-        if(fileDataRepository.countAllByOwnerId(profil.getId())>=10){
-            return ResponseEntity.status(HttpStatus.OK).body(MessageResponse.builder().message("Can't upload more than 10 images.").hasError(true).build());
+        if (fileDataRepository.countAllByOwnerId(profil.getId()) >= 20) {
+            return ResponseEntity.status(HttpStatus.OK).body(MessageResponse.builder().message("Can't upload more than 20 images.").hasError(true).build());
         }
 
         if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
@@ -145,7 +143,7 @@ public class MediaServiceImpl implements MediaService {
 
         // Create a Thumbnails object and set the output format to JPEG
         Thumbnails.of(inputStream)
-                .size(700,700)
+                .size(700, 700)
                 .outputFormat("jpg")
                 .toOutputStream(outputStream);
 
@@ -161,52 +159,51 @@ public class MediaServiceImpl implements MediaService {
                 .fileSize(file.getSize())
                 .build());
 
-        postRepository.save(Post.builder()
-                        .title("IMAGE")
-                .media(save)
-                .isDraft(true)
-                .createdDate(LocalDateTime.now())
-                .ownerId(profil.getId()).build());
-        return ResponseEntity.status(HttpStatus.CREATED).body("file uploaded successfully with id : "+save.getId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(MessageResponse.builder()
+                    .message("file uploaded successfully with id : " + save.getId())
+                    .payload(save.getId())
+                    .build());
 
     }
-
+@Autowired
+    PostMapper postMapper;
     @Override
     public String uploadImageToFileSystem(MultipartFile file, String ownerId) throws IOException {
-return "";
-   //    initDir();
-   //    if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
-   //        throw new RuntimeException("");
-   //    }
+        return "";
+        //    initDir();
+        //    if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
+        //        throw new RuntimeException("");
+        //    }
 
-   //    Profile profil = profilRepository.findByUsername(ownerId).get();
+        //    Profile profil = profilRepository.findByUsername(ownerId).get();
 
-   //    Media save = fileDataRepository.save(Media.builder()
-   //            .fileType(file.getContentType())
-   //            .createdDate(LocalDate.now())
-   //            .ownerId(profil.getId())
-   //            .build());
-   //    String s = UUID.randomUUID().toString().concat("." + save.getFileType().split("/")[1]);
-   //    save.setFilename(s);
-   //    String filePath = FOLDER_PATH + profil.getId() + File.separator + s;
-   //    save.setFilePath(filePath);
-   //    fileDataRepository.save(save);
+        //    Media save = fileDataRepository.save(Media.builder()
+        //            .fileType(file.getContentType())
+        //            .createdDate(LocalDate.now())
+        //            .ownerId(profil.getId())
+        //            .build());
+        //    String s = UUID.randomUUID().toString().concat("." + save.getFileType().split("/")[1]);
+        //    save.setFilename(s);
+        //    String filePath = FOLDER_PATH + profil.getId() + File.separator + s;
+        //    save.setFilePath(filePath);
+        //    fileDataRepository.save(save);
 
-   //    try {
-   //        File outputFile = new File(filePath);
-   //        outputFile.getParentFile().mkdirs(); // Will create parent directories if not exists
-   //        file.transferTo(outputFile);
-   //        Thumbnails.of(outputFile).size(1000, 1000).toFile(outputFile);
+        //    try {
+        //        File outputFile = new File(filePath);
+        //        outputFile.getParentFile().mkdirs(); // Will create parent directories if not exists
+        //        file.transferTo(outputFile);
+        //        Thumbnails.of(outputFile).size(1000, 1000).toFile(outputFile);
 
-   //    } catch (Exception exception) {
-   //        fileDataRepository.deleteById(save.getId());
-   //        exception.printStackTrace();
-   //    }
+        //    } catch (Exception exception) {
+        //        fileDataRepository.deleteById(save.getId());
+        //        exception.printStackTrace();
+        //    }
 
-   //    return "file uploaded successfully : " + filePath;
+        //    return "file uploaded successfully : " + filePath;
     }
 
     private void initDir() throws IOException {
-    //    Files.createDirectories(Paths.get(FOLDER_PATH));
+        //    Files.createDirectories(Paths.get(FOLDER_PATH));
     }
 }

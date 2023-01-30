@@ -11,4 +11,5 @@ public class CommentDTO extends BaseDTO {
     private Long ownerId;
     private String ownerFullName;
     private String postId;
+    private int likes;
 }

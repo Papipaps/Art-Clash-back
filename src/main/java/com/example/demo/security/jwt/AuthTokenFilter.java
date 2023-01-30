@@ -28,14 +28,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (
-                   !request.getServletPath().equals("/api/auth/signin")
-                && !request.getServletPath().equals("/api/auth/token/refresh")
-                && !request.getServletPath().equals("/api/auth/signup")
-                && !request.getServletPath().equals("/api/auth/signout")) {
 
+        if (!request.getServletPath().equals("/api/auth/signin")
+            && !request.getServletPath().equals("/api/auth/token/refresh")
+            && !request.getServletPath().equals("/api/auth/signup")
+            && !request.getServletPath().equals("/api/auth/signout")) {
 
-        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 try {
                     String token = authHeader.substring("Bearer ".length());

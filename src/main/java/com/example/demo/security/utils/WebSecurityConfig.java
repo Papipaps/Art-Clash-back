@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import javax.servlet.http.HttpServletResponse;
 
 
+
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -47,10 +48,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
+    private static final String[] AUTH_WHITELIST = {
+            "/authenticate",
+            "/swagger-resources/**",
+            "/swagger-ui/**",
+            "/v3/api-docs",
+            "/webjars/**",
+            "/api/**"
+    };
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
          CustomAuthFilter customAuthFilter = new CustomAuthFilter(authenticationManagerBean());
          customAuthFilter.setFilterProcessesUrl("/api/auth/signin");
+
         // Enable CORS and disable CSRF
         http = http.cors().and().csrf().disable();
 
@@ -72,12 +83,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         }
                 )
                 .and();
-
         // Set permissions on endpoints
       http.authorizeRequests()
-              // Our public endpoints
               .antMatchers("/api/**").permitAll()
-              //  .antMatchers("/api/auth/**").permitAll()
+           //   .antMatchers("/api/**").hasAnyAuthority(ERole.ROLE_USER.name(),ERole.ROLE_ADMIN.name())
            //   .antMatchers("/api/**").hasAnyAuthority(ERole.ROLE_USER.name(),ERole.ROLE_ADMIN.name())
               .anyRequest().authenticated();
 

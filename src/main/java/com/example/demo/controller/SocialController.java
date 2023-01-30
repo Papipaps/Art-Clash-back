@@ -1,9 +1,11 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.data.Like;
 import com.example.demo.model.dto.ProfilDTO;
 import com.example.demo.payload.response.MessageResponse;
 import com.example.demo.service.RelationshipService;
 import com.example.demo.service.SocialService;
+import com.example.demo.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +24,7 @@ public class SocialController {
 
     @Autowired
     private RelationshipService relationshipService;
+
 
     @PostMapping("follow")
     private ResponseEntity<?> followProfil(@RequestParam String userId){
@@ -45,6 +48,24 @@ public class SocialController {
                                            @RequestParam(required = false,defaultValue = "0") int page){
          Page<ProfilDTO> followers =  socialService.getFollowers(userId, PageRequest.of(page,size));
         return ResponseEntity.status(HttpStatus.OK).body(followers);
+    }
+
+    @PostMapping("like/{id}")
+    private ResponseEntity<?> likeEntity(@PathVariable String id, @RequestParam String tag){
+        boolean res = socialService.likeEntity(AuthUtils.getLoggedUsername(), id, tag);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+    @PostMapping("like/remove/{id}")
+    private ResponseEntity<?> removeLikeEntity(@PathVariable String id){
+        boolean res = socialService.removeLikeEntity(AuthUtils.getLoggedUsername(),id);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    @GetMapping("like/list/{entityId}")
+    private ResponseEntity<?> getLikes(@PathVariable String entityId,
+                                       @RequestParam(required = false,defaultValue = "9") int size,
+                                       @RequestParam(required = false,defaultValue = "0") int page){
+        return ResponseEntity.status(HttpStatus.OK).body(socialService.getLikes(entityId, PageRequest.of(page,size)));
     }
 
 }

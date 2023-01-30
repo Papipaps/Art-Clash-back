@@ -1,25 +1,24 @@
 package com.example.demo.service;
 
 
-import com.example.demo.model.data.Media;
 import com.example.demo.model.data.Post;
 import com.example.demo.model.data.Profile;
 import com.example.demo.model.dto.PostDTO;
-import com.example.demo.model.dto.ProfilDTO;
 import com.example.demo.repository.MediaRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.ProfileRepository;
 import com.example.demo.utils.CustomDate;
+import com.example.demo.utils.CustomDateUtils;
 import com.example.demo.utils.mapper.PostMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +33,8 @@ public class PostServiceImpl implements PostService {
     private MediaRepository mediaRepository;
     @Autowired
     private PostMapper postMapper;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Override
     public PostDTO getPost(String id) {
@@ -45,11 +46,6 @@ public class PostServiceImpl implements PostService {
 
 
         PostDTO postDTO = postMapper.toDTO(post);
-
-        if(post.getMedia()!=null){
-            Media media = mediaRepository.findById(post.getMedia().getId()).orElseGet(() -> null);
-            postDTO.setMedia(media);
-        }
 
         postDTO.setOwnerFullname(profil.isAnonymous() ? profil.getUsername() : profil.getFirstname().concat(" ").concat(profil.getLastname()));
 
@@ -80,21 +76,9 @@ public class PostServiceImpl implements PostService {
         post.setOwnerFullname(profil.getFirstname() + " " + profil.getLastname());
 
         PostDTO res = postMapper.toDTO(postRepository.save(post));
-        LocalDateTime createdDate = post.getCreatedDate();
-        int year = createdDate.getYear();
-        int month = createdDate.getMonthValue();
-        int day = createdDate.getDayOfMonth();
-        int hour = createdDate.getHour();
-        int minute = createdDate.getMinute();
-        int second = createdDate.getSecond();
-        postDTO.setPostedAt(CustomDate.builder()
-                .day(day)
-                .month(month)
-                .year(year)
-                .hour(hour)
-                .minute(minute)
-                .second(second).build());
-        return postDTO;
+
+        res.setPostedAt(CustomDateUtils.getDateWithTime(post.getCreatedDate()));
+        return res;
     }
 
 
@@ -117,37 +101,29 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<PostDTO> getAllByOwnerId(String ownerId, Pageable pageable) {
-        Page<Post> allByOwnerId = postRepository.findAllByOwnerId(ownerId, pageable);
-        List<PostDTO> postDTOList = allByOwnerId.getContent().stream().map(post -> {
+    public Page<PostDTO> getAllByOwnerId(String ownerId, Pageable pageable, boolean isMedia) {
+
+        Page<Post> postPage;
+        if(isMedia){
+            postPage = postRepository.findAllByOwnerIdAndMediaIdNotNull(ownerId, pageable);
+        }else{
+            postPage = postRepository.findAllByOwnerId(ownerId, pageable);
+        }
+
+        List<PostDTO> postDTOList = postPage.getContent().stream().map(post -> {
 
             PostDTO postDTO = postMapper.toDTO(post);
             Profile profil = profileRepository.findById(ownerId).get();
 
-            if(post.getMedia()!=null){
-                Media media = mediaRepository.findById(post.getMedia().getId()).orElseGet(() -> null);
-                postDTO.setMedia(media);
-            }
-
             postDTO.setOwnerFullname(profil.isAnonymous() ? profil.getUsername() : profil.getFirstname().concat(" ").concat(profil.getLastname()));
 
-            LocalDateTime createdDate = post.getCreatedDate();
-            int year = createdDate.getYear();
-            int month = createdDate.getMonthValue();
-            int day = createdDate.getDayOfMonth();
-            int hour = createdDate.getHour();
-            int minute = createdDate.getMinute();
-            int second = createdDate.getSecond();
-            postDTO.setPostedAt(CustomDate.builder()
-                    .day(day)
-                    .month(month)
-                    .year(year)
-                    .hour(hour)
-                    .minute(minute)
-                    .second(second).build());
+            postDTO.setPostedAt(CustomDateUtils.getDateWithTime(post.getCreatedDate()));
             return postDTO;
         }).collect(Collectors.toList());
-        return new PageImpl<>(postDTOList, pageable, postDTOList.size());
+
+
+
+        return new PageImpl<>(postDTOList, pageable, postPage.getTotalElements());
 
     }
 }

@@ -25,7 +25,5 @@ public class Media {
     private String tag;
     private String thumbnailPath;
     private LocalDate createdDate;
-    @DBRef(db = "post")
-    private Post post;
 
 }
