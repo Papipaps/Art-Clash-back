@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.io.File;
 import java.util.Date;
@@ -24,6 +25,7 @@ import java.util.Optional;
 
 
 @SpringBootApplication
+@EnableSwagger2
 @EnableMongoRepositories(basePackages = "com.example.demo.repository")
 public class DemoApplication {
 
@@ -40,13 +42,13 @@ public class DemoApplication {
                 "https://44.227.217.144",
                 "https://art-clash.onrender.com/",
                 "http://localhost:3000/"));
-        configuration.setAllowedMethods(List.of("HEAD",
-                "GET", "POST", "PUT", "DELETE", "PATCH"));
+        configuration.setAllowedMethods(List.of("HEAD","GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 
 }

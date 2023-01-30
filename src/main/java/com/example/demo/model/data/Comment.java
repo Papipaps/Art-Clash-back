@@ -21,5 +21,7 @@ public class Comment {
     @DBRef(lazy = true)
     private Post post;
 
+    private int likes;
+
 
 }

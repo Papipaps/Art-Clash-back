@@ -17,7 +17,7 @@ public class PostDTO extends BaseDTO {
     private Boolean resolved;
     private Boolean isDraft;
     private CustomDate postedAt;
-    private Media media;
+    private String mediaId;
     private LocalDateTime createdDate;
 
 

@@ -55,12 +55,12 @@ public class MediaController {
     }
 
     @GetMapping("downloadAllByOwner/{ownerId}")
-    public ResponseEntity<?> downloadAllByOwner(@PathVariable String ownerId, @RequestParam(defaultValue = "0",required = false) int page,@RequestParam(defaultValue = "9",required = false)int size) throws IOException {
+    public ResponseEntity<?> downloadAllByOwner(@PathVariable String ownerId, @RequestParam(defaultValue = "0",required = false) int page,@RequestParam(defaultValue = "10",required = false)int size) throws IOException {
         var imageData = mediaService.downloadAllMediaIdByOwner(ownerId, PageRequest.of(page, size));
         return ResponseEntity.status(HttpStatus.OK).body(imageData);
 
     }
-    @DeleteMapping("deleteMedia/{id}")
+    @DeleteMapping("delete/{id}")
     public ResponseEntity<?> downloadAllByOwner(@PathVariable String id) {
         boolean deleted = mediaService.delete(id);
         String payload = deleted?"Media has been deleted successfully !":"Error while deleting media with id : "+id+".";

@@ -13,4 +13,6 @@ public class MessageResponse {
 
 	private boolean hasError;
 	private String message;
+
+	private Object payload;
 }

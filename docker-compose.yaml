@@ -12,17 +12,17 @@ services:
     volumes:
       - ./data:/data/db
 
-  app:
-    build: .
-    container_name: artclash-app
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mongodb
-    links:
-      - mongodb
-    environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/artclash
+ # app:
+ #   build: .
+ #   container_name: artclash-app
+ #   ports:
+ #     - "8080:8080"
+ #   depends_on:
+ #     - mongodb
+ #   links:
+ #     - mongodb
+ #   environment:
+ #     - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/artclash
 
   mongo-express:
     image: mongo-express
