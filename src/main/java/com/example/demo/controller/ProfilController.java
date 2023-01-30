@@ -13,8 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/profil")
-//@Api(value = "Profile Controller")
- public class ProfilController {
+public class ProfilController {
 
     @Autowired
     ProfilService profilService;
@@ -24,15 +23,15 @@ import java.util.List;
 
 
     @GetMapping
-//    @ApiOperation(value = "Example endpoint", notes = "This endpoint is for demonstration purposes")
-    public String hello(){
+    public String hello() {
         return "hello";
     }
 
     @GetMapping("test")
-    public Profile test(){
+    public Profile test() {
         return profilRepository.save(Profile.builder().id("uuid-test").username("test").build());
     }
+
     @PutMapping(path = "update")
     ProfilDTO updateProfil(@RequestBody ProfilDTO profilDTO) {
         return profilService.updateProfil(profilDTO);
@@ -53,12 +52,13 @@ import java.util.List;
     ProfilDTO getCurrentProfilInfo(@RequestParam(required = false) String username) {
         Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
         username = username == null || username.isBlank() ? loggedInUser.getName() : username;
-        return profilService.getProfil(username,true);
+        return profilService.getProfil(username, true);
     }
+
     @GetMapping(path = "getProfil/{id}")
     ProfilDTO getProfil(@RequestParam(required = false) String id) {
         Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
-        return profilService.getProfil(id,false);
+        return profilService.getProfil(id, false);
     }
 
     @GetMapping(path = "getPublicInformation")
