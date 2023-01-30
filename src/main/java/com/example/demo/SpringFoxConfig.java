@@ -1,3 +1,4 @@
+/*
 package com.example.demo;
 
 import org.springframework.context.annotation.Bean;
@@ -41,3 +42,4 @@ public class SpringFoxConfig {
         return Arrays.asList(new SecurityReference(AUTHORIZATION_HEADER, authorizationScopes));
     }
 }
+*/

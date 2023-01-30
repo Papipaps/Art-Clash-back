@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.io.File;
 import java.util.Date;
@@ -25,7 +24,6 @@ import java.util.Optional;
 
 
 @SpringBootApplication
-@EnableSwagger2
 @EnableMongoRepositories(basePackages = "com.example.demo.repository")
 public class DemoApplication {
 

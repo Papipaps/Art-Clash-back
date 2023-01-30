@@ -4,8 +4,6 @@ import com.example.demo.model.data.Profile;
 import com.example.demo.model.dto.ProfilDTO;
 import com.example.demo.repository.ProfileRepository;
 import com.example.demo.service.ProfilService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/profil")
-@Api(value = "Profile Controller")
+//@Api(value = "Profile Controller")
  public class ProfilController {
 
     @Autowired
@@ -26,7 +24,7 @@ import java.util.List;
 
 
     @GetMapping
-    @ApiOperation(value = "Example endpoint", notes = "This endpoint is for demonstration purposes")
+//    @ApiOperation(value = "Example endpoint", notes = "This endpoint is for demonstration purposes")
     public String hello(){
         return "hello";
     }
