@@ -15,6 +15,7 @@ services:
       #- MONGO_DB_PASSWORD:${MONGO_DB_PASSWORD}
     volumes:
       - ./mongodb/data:/data/db
+      - ./dump:/dump
       - ${MONGO_INITDB_SCRIPTS_HOST_PATH}:/docker-entrypoint-initdb.d/
     networks:
       - main-network
@@ -52,6 +53,11 @@ services:
       - "8081:8081"
     environment:
       - ME_CONFIG_MONGODB_SERVER:mongodb
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
+      - ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGO_ROOT_USERNAME}
+      - ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGO_ROOT_PASSWORD}
 volumes:
   data: { }
 networks:

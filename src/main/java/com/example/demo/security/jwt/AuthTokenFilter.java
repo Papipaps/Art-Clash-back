@@ -31,7 +31,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         if (!request.getServletPath().equals("/api/auth/signin")
             && !request.getServletPath().equals("/api/auth/token/refresh")
-            && !request.getServletPath().equals("/api/auth/signup")
+            && !request.getServletPath().equals("/api/auth/register")
             && !request.getServletPath().equals("/api/auth/signout")) {
 
             String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);

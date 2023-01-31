@@ -11,6 +11,7 @@
  import com.example.demo.model.dto.ProfilDTO;
  import com.example.demo.payload.request.SignupRequest;
  import com.example.demo.repository.ProfileRepository;
+ import com.example.demo.repository.RoleRepository;
  import com.example.demo.service.RoleService;
  import com.example.demo.utils.mapper.ProfilMapper;
  import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +20,7 @@
  import org.springframework.http.MediaType;
  import org.springframework.security.authentication.AuthenticationManager;
  import org.springframework.security.core.userdetails.UsernameNotFoundException;
+ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  import org.springframework.security.crypto.password.PasswordEncoder;
  import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +28,9 @@
  import javax.servlet.http.HttpServletResponse;
  import java.time.Instant;
  import java.time.temporal.ChronoUnit;
+ import java.util.Date;
  import java.util.HashMap;
+ import java.util.List;
  import java.util.Map;
  import java.util.stream.Collectors;
 
@@ -48,9 +52,46 @@ public class AuthController {
     @Autowired
     private RoleService roleService;
 
+     @Autowired
+     private RoleRepository roleRepository;
+     @Autowired
+     private ProfileRepository profileRepository;
+
+      private void initData(){
+         Role roleUser = new Role();
+         roleUser.setId("UUID-ROLE-USER");
+         roleUser.setName("ROLE_USER");
+         roleRepository.save(roleUser);
+
+         Role roleAdmin = new Role();
+         roleAdmin.setId("UUID-ROLE-ADMIN");
+         roleAdmin.setName("ROLE_ADMIN");
+         roleRepository.save(roleAdmin);
+
+         if (!profileRepository.existsByUsername("admin") && !profileRepository.existsByUsername("username")) {
+
+             profileRepository.saveAll(List.of(
+                             Profile.builder()
+                                     .username("admin")
+                                     .roles(List.of(roleAdmin, roleUser))
+                                     .password(new BCryptPasswordEncoder().encode("secretadmin!"))
+                                     .createdDate(new Date())
+                                     .build(),
+                             Profile.builder()
+                                     .username("username")
+                                     .roles(List.of(roleUser))
+                                     .password(new BCryptPasswordEncoder().encode("secretuser!"))
+                                     .createdDate(new Date())
+                                     .build()
+                     )
+             );
+         }
+     }
+
 
     @PostMapping("/register")
     public ProfilDTO registerUser(@RequestBody SignupRequest signUpRequest) {
+          initData();
         if (profilRepository.existsByUsername(signUpRequest.getUsername())) {
             throw new UsernameNotFoundException("Username already exists");
         }
