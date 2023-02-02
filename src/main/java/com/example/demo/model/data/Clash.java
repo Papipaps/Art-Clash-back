@@ -20,10 +20,12 @@ public class Clash {
     private String title;
     private String theme;
     private String description;
-    private List<String> contestants;
+    private List<Battle> contestants;
     private LocalDateTime createdDate;
     private boolean isFinished;
     private int likes;
+    private int round;
+    private int currentRound;
     private Podium podium;
 
 

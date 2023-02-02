@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.model.data.Battle;
 import com.example.demo.model.data.Clash;
+import com.example.demo.model.data.Podium;
 import com.example.demo.model.data.Profile;
 import com.example.demo.model.dto.ClashDTO;
 import com.example.demo.repository.BattleRepository;
@@ -15,8 +16,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ClashServiceImpl implements ClashService {
@@ -109,20 +112,63 @@ public class ClashServiceImpl implements ClashService {
         return null;
     }
 
+    @Override
+    public ClashDTO nextRound(String clashId) {
 
-    public void updateResult(Battle node, String winningContestant) {
-        if (node == null) {
-            return;
+        Optional<Clash> optionalClash = clashRepository.findById(clashId);
+        if (optionalClash.isPresent()){
+            Clash clash = optionalClash.get();
+
+            int currentRound = clash.getCurrentRound();
+            int totalRound = clash.getRound();
+            List<Battle> currentContestans = clash.getContestants();
+            int nbContestans = currentContestans.size();
+            int skip = nbContestans > 6 ? 2 : 1;
+
+            if (currentRound+1==totalRound){
+
+                currentContestans.sort(Comparator.comparingInt(Battle::getScore));
+                List<Battle> winners = currentContestans.subList(nbContestans-1,nbContestans-3);
+
+                Podium podium = Podium.builder()
+                        .first(winners.get(2).getContestantId())
+                        .second(winners.get(1).getContestantId())
+                        .third(winners.get(0).getContestantId())
+                        .build();
+                clash.setFinished(true);
+                clash.setCurrentRound(totalRound);
+                clash.setPodium(podium);
+                clashRepository.save(clash);
+
+
+            }else {
+
+                List<Battle> currentBattles = clash.getContestants();
+                currentBattles.sort((Comparator.comparingInt(Battle::getScore)));
+
+                List<Battle> losers = currentBattles.subList(0, skip);
+                losers.forEach(battle -> {
+                    battle.setCurrentRound(currentRound);
+                    battleRepository.save(battle);
+                });
+
+                List<Battle> winners = currentBattles.stream().skip(skip)
+                        .map(battle -> {
+                    battle.setHasWin(true);
+                    battle.setCurrentRound(currentRound);
+                    battleRepository.save(battle);
+                    battle.setMediaId("");
+                    battle.setHasWin(false);
+                    return battle;
+                }).collect(Collectors.toList());
+
+                clash.setContestants(winners);
+                clash.setCurrentRound(currentRound+1);
+                return clashMapper.toDTO(clashRepository.save(clash));
+            }
+
         }
-        if (winningContestant.equals(node.getContestantA())) {
-            updateResult(node.getLeft(), winningContestant);
-        } else {
-            updateResult(node.getRight(), winningContestant);
-        }
-    }
+        return null;
 
-    public void saveTournamentToDB(Battle node) {
-        // Save node to MongoDB
     }
-
 }

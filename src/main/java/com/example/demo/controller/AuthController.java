@@ -52,47 +52,12 @@ public class AuthController {
     @Autowired
     private RoleService roleService;
 
-     @Autowired
-     private RoleRepository roleRepository;
-     @Autowired
-     private ProfileRepository profileRepository;
 
-      private void initData(){
-         Role roleUser = new Role();
-         roleUser.setId("UUID-ROLE-USER");
-         roleUser.setName("ROLE_USER");
-         roleRepository.save(roleUser);
-
-         Role roleAdmin = new Role();
-         roleAdmin.setId("UUID-ROLE-ADMIN");
-         roleAdmin.setName("ROLE_ADMIN");
-         roleRepository.save(roleAdmin);
-
-         if (!profileRepository.existsByUsername("admin") && !profileRepository.existsByUsername("username")) {
-
-             profileRepository.saveAll(List.of(
-                             Profile.builder()
-                                     .username("admin")
-                                     .roles(List.of(roleAdmin, roleUser))
-                                     .password(new BCryptPasswordEncoder().encode("secretadmin!"))
-                                     .createdDate(new Date())
-                                     .build(),
-                             Profile.builder()
-                                     .username("username")
-                                     .roles(List.of(roleUser))
-                                     .password(new BCryptPasswordEncoder().encode("secretuser!"))
-                                     .createdDate(new Date())
-                                     .build()
-                     )
-             );
-         }
-     }
 
 
     @PostMapping("/register")
     public ProfilDTO registerUser(@RequestBody SignupRequest signUpRequest) {
-          initData();
-        if (profilRepository.existsByUsername(signUpRequest.getUsername())) {
+         if (profilRepository.existsByUsername(signUpRequest.getUsername())) {
             throw new UsernameNotFoundException("Username already exists");
         }
 

@@ -1,66 +1,16 @@
 version: "3.8"
 services:
-  mongodb:
-    image: mongo
-    hostname: mongodb
-    container_name: mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME:${MONGO_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD:${MONGO_ROOT_PASSWORD}
-      - MONGO_INITDB_DATABASE:${MONGO_DB}
-      #- MONGO_DB_USERNAME:${MONGO_DB_USERNAME}
-      #- MONGO_DB_PASSWORD:${MONGO_DB_PASSWORD}
-    volumes:
-      - ./mongodb/data:/data/db
-      - ./dump:/dump
-      - ${MONGO_INITDB_SCRIPTS_HOST_PATH}:/docker-entrypoint-initdb.d/
-    networks:
-      - main-network
-    command:
-      - "--bind_ip"
-      - "0.0.0.0"
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: artclash-app
-    restart: on-failure
-    depends_on:
-      - mongodb
+  artclash-service:
+    build: .
+    restart: always
     ports:
       - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE:prod
-      - SPRING_APPLICATION_NAME:${APP_NAME}
-      - SPRING_DATA_MONGODB_AUTHENTIFICATION_DATABASE:admin
-      - SPRING_DATA_MONGODB_AUTO_INDEX_CREATION:${MONGO_AUTO_INDEX_CREATION}
-      - SPRING_DATA_MONGODB_HOST:mongodb
-      - SPRING_DATA_MONGODB_PORT:27017
-      #- SPRING_DATA_MONGODB_USERNAME:${MONGO_DB_USERNAME}
-      #- SPRING_DATA_MONGODB_PASSWORD:${MONGO_DB_PASSWORD}
-      - SPRING_DATA_MONGODB_DATABASE:${MONGO_DB}
-    networks:
-      - main-network
-
-  mongo-express:
-    image: mongo-express
-    container_name: mongo-express
-    restart: unless-stopped
+    depends_on:
+      - mongo-container
+  mongo-container:
+    image: mongo:6.0.4
+    restart: always
     ports:
-      - "8081:8081"
-    environment:
-      - ME_CONFIG_MONGODB_SERVER:mongodb
-      - ME_CONFIG_MONGODB_PORT=27017
-      - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
-      - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
-      - ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGO_ROOT_USERNAME}
-      - ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGO_ROOT_PASSWORD}
-volumes:
-  data: { }
-networks:
-  main-network:
-    external:
-      name: ${NETWORK_NAME}
+      - "27017:27017"
+    volumes:
+      - ./mongodb/data:/data/db

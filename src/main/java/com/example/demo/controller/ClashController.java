@@ -67,6 +67,12 @@ public class ClashController {
                 .body(clashService.deleteClash(id) ? "Clash with id : " + id + " deleted." : "Could not delete clash. (doesn't exist)");
     }
 
+    @PostMapping("next/{clashId}")
+    private ResponseEntity<?> nextRoundClash(@PathVariable String clashId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(clashService.nextRound(clashId));
+    }
+
     @PostMapping("terminate/{clashId}")
     private ResponseEntity<?> finishClash(@PathVariable String clashId) {
         return ResponseEntity.status(HttpStatus.OK)

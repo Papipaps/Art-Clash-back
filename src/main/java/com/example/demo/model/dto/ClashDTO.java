@@ -1,5 +1,6 @@
 package com.example.demo.model.dto;
 
+import com.example.demo.model.data.Battle;
 import com.example.demo.model.data.Like;
 import com.example.demo.model.data.Podium;
 import lombok.AllArgsConstructor;
@@ -22,11 +23,13 @@ public class ClashDTO extends BaseDTO {
     private String title;
     private String theme;
     private String description;
-    private List<String> contestants;
+    private List<Battle> contestants;
     private LocalDateTime createdDate;
     private Podium podium;
     private boolean isFinished;
     private int likes;
+    private int round;
+    private int currentRound;
 
 
 }

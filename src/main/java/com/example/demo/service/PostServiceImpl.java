@@ -115,7 +115,7 @@ public class PostServiceImpl implements PostService {
             PostDTO postDTO = postMapper.toDTO(post);
             Profile profil = profileRepository.findById(ownerId).get();
 
-            postDTO.setOwnerFullname(profil.isAnonymous() ? profil.getUsername() : profil.getFirstname().concat(" ").concat(profil.getLastname()));
+            postDTO.setOwnerFullname(profil.getUsername() + (profil.isAnonymous() ? "" : String.format(" ( %s %s )",profil.getFirstname(),profil.getLastname())));
 
             postDTO.setPostedAt(CustomDateUtils.getDateWithTime(post.getCreatedDate()));
             return postDTO;

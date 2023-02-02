@@ -20,17 +20,15 @@ public class Battle {
     private @Id String id;
     private String clashId;
 
-    private String contestantA;
-    private String contestantB;
+    private String contestantId;
 
-    private String winner;
+    private String mediaId;
+    private boolean hasWin;
 
-    private Battle left;
-    private Battle right;
+    private int currentRound;
+    private int score;
 
-    public Battle(Battle left, Battle right) {
-        this.right = right;
-        this.left = left;
-    }
+
+
 
 }

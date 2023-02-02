@@ -20,4 +20,6 @@ public interface ClashService {
     Page<Clash> listAllFilteredClash(String ownerId,boolean finished ,Pageable pageable);
 
     ClashDTO finishClash(String clashId);
+
+    ClashDTO nextRound(String clashId);
 }

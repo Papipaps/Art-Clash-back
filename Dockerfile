@@ -11,5 +11,6 @@ RUN mvn clean package
 # Package stage
 #
 FROM openjdk:11
+EXPOSE 8080
 COPY --from=build /app/target/*.jar /usr/app/app.jar
 ENTRYPOINT ["java","-jar","/usr/app/app.jar"]
