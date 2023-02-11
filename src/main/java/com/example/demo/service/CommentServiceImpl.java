@@ -16,10 +16,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -37,8 +35,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Page<CommentDTO> getCommentsByPost(String postId, Pageable pageable) {
-        Page<Comment> allByPostId = commentRepository.findAllByPostId(postId, pageable);
-        List<CommentDTO> commentDTOS = commentMapper.toDTOs(allByPostId.getContent());
+        Post post = postRepository.findById(postId).get();
+        List<CommentDTO> commentDTOS = commentMapper.toDTOs(new ArrayList<>(post.getComment()));
         return new PageImpl<>(commentDTOS, pageable, commentDTOS.size());
     }
 
@@ -62,8 +60,8 @@ public class CommentServiceImpl implements CommentService {
         if (id == null) {
             throw new RuntimeException("Non null required");
         }
-        Page<Comment> allByPostId = commentRepository.findAllByPostId(id, pageable);
-        List<CommentDTO> commentDTOList = commentMapper.toDTOs(allByPostId.getContent());
+         Optional<Post> post = postRepository.findById(id);
+        List<CommentDTO> commentDTOList = commentMapper.toDTOs(new ArrayList<>(post.get().getComment()));
         return new PageImpl<>(commentDTOList, pageable, commentDTOList.size());
     }
 
@@ -78,11 +76,9 @@ public class CommentServiceImpl implements CommentService {
                 .ownerId(profile.getId())
                 .createdDate(new Date())
                 .message(commentDTO.getMessage())
-                .post(optPost.get())
                 .build();
 
         Post post = optPost.get();
-        comment.setPost(post);
 
         return commentMapper.toDTO(commentRepository.save(comment));
     }

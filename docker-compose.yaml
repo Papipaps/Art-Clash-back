@@ -6,11 +6,13 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - mongo-container
-  mongo-container:
-    image: mongo:6.0.4
-    restart: always
+      - postgres-container
+  postgres-container:
+    image: postgres:alpine
+    restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: secretpassword
     volumes:
-      - ./mongodb/data:/data/db
+      - ./database/data:/data/db

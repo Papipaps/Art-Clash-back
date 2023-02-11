@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,8 +32,6 @@ public class PostServiceImpl implements PostService {
     private MediaRepository mediaRepository;
     @Autowired
     private PostMapper postMapper;
-    @Autowired
-    private MongoTemplate mongoTemplate;
 
     @Override
     public PostDTO getPost(String id) {

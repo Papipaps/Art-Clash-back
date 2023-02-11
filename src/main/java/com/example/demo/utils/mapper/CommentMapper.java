@@ -11,11 +11,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 
-    @Mapping(source = "post.id", target = "postId",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
-    CommentDTO toDTO(Comment comment);
+     CommentDTO toDTO(Comment comment);
 
-    @Mapping(source = "postId", target = "post.id",nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
-    Comment toEntity(CommentDTO commentDTO);
+     Comment toEntity(CommentDTO commentDTO);
 
     List<Comment> toEntities(List<CommentDTO> commentDTOS);
 

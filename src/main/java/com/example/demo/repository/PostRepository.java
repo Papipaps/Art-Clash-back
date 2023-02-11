@@ -4,9 +4,12 @@ import com.example.demo.model.data.Post;
 import com.example.demo.model.dto.PostDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface PostRepository extends MongoRepository<Post,String > {
+@Repository
+
+public interface PostRepository extends JpaRepository<Post,String > {
     Page<Post> findAllByOwnerId(String username, Pageable pageable);
 
     Page<Post> findAllByOwnerIdAndMediaIdNotNull(String ownerId, Pageable pageable);

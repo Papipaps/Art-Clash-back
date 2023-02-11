@@ -8,20 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
 import java.util.List;
 
 @SpringBootApplication
-@EnableMongoRepositories(basePackages = "com.example.demo.repository")
-public class DemoApplication  {
+@EnableJpaRepositories(basePackages = "com.example.demo.repository")
+public class DemoApplication implements CommandLineRunner {
     public static void main(java.lang.String[] args) {
         SpringApplication.run(DemoApplication.class, args);
     }
 
-/*
+
     @Autowired
     private RoleRepository roleRepository;
     @Autowired
@@ -30,36 +30,26 @@ public class DemoApplication  {
     @Override
     public void run(String... args) throws Exception {
 
-        if (roleRepository.existsById("UUID-ROLE-USER") && roleRepository.existsById("UUID-ROLE-ADMIN")) {
-            Role roleUser = new Role();
-            roleUser.setId("UUID-ROLE-USER");
-            roleUser.setName("ROLE_USER");
-            roleRepository.save(roleUser);
+        Role roleAdmin = roleRepository.save(Role.builder().name("ROLE_ADMIN").build());
+        Role roleUser = roleRepository.save(Role.builder().name("ROLE_USER").build());
 
-            Role roleAdmin = new Role();
-            roleAdmin.setId("UUID-ROLE-ADMIN");
-            roleAdmin.setName("ROLE_ADMIN");
-            roleRepository.save(roleAdmin);
+        profileRepository.saveAll(List.of(
+                        Profile.builder()
+                                .username("admin")
+                                .email("admin@yopmail.fr")
+                                .roles(List.of(roleAdmin, roleUser))
+                                .password(new BCryptPasswordEncoder().encode("secretadmin!"))
+                                .createdDate(new Date())
+                                .build(),
+                        Profile.builder()
+                                .username("username")
+                                .email("user@yopmail.fr")
+                                .roles(List.of(roleUser))
+                                .password(new BCryptPasswordEncoder().encode("secretuser!"))
+                                .createdDate(new Date())
+                                .build()
+                )
+        );
+    }
 
-            if (!profileRepository.existsByUsername("admin") && !profileRepository.existsByUsername("username")) {
-
-                profileRepository.saveAll(List.of(
-                                Profile.builder()
-                                        .username("admin")
-                                        .roles(List.of(roleAdmin, roleUser))
-                                        .password(new BCryptPasswordEncoder().encode("secretadmin!"))
-                                        .createdDate(new Date())
-                                        .build(),
-                                Profile.builder()
-                                        .username("username")
-                                        .roles(List.of(roleUser))
-                                        .password(new BCryptPasswordEncoder().encode("secretuser!"))
-                                        .createdDate(new Date())
-                                        .build()
-                        )
-                );
-            }
-        }
-
-    }*/
 }

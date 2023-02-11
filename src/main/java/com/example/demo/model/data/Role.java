@@ -4,18 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.*;
 
 
-
-@Document("roles")
+@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class Role {
+
   @Id
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
+  @Column(length = 36, nullable = false, updatable = false)
   private String id;
 
   private String name;

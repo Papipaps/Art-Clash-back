@@ -33,7 +33,8 @@ public class MediaController {
     public ResponseEntity<?> uploadImageToDB(@RequestBody MultipartFile file) throws IOException {
         Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
         String username = loggedInUser.getName();
-        return mediaService.uploadImageToDB(file,username);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(mediaService.uploadImageToDB(file,username));
     }
 
     @GetMapping("download/{id}")

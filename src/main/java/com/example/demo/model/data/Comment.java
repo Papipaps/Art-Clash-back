@@ -2,25 +2,24 @@ package com.example.demo.model.data;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.*;
 import java.util.Date;
 
 @Builder
-@Document("comment")
+@Entity
 @Data
 public class Comment {
     @Id
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
+    @Column(length = 36, nullable = false, updatable = false)
      private String id;
     private String ownerId;
     private String ownerFullName;
     private String message;
     private Date createdDate;
-    @DBRef(lazy = true)
-    private Post post;
-
     private int likes;
 
 

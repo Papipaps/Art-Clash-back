@@ -1,32 +1,42 @@
 package com.example.demo.model.data;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
-@Document
+@Entity
 @Data
 @Builder
 public class Clash {
 
-    private @Id String id;
+    @Id
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
+    @Column(length = 36, nullable = false, updatable = false)
+    private String id;
     private String ownerId;
     private String title;
     private String theme;
     private String description;
-    private List<Battle> contestants;
+//    @ManyToMany
+//    private Collection<Contestant> contestants;
     private LocalDateTime createdDate;
-    private boolean isFinished;
+    private boolean restricted;
+    private String status;
     private int likes;
     private int round;
+    private String first;
+    private String second;
+    private String third;
     private int currentRound;
-    private Podium podium;
+    private int slot;
 
+
+//    private String[] artists;
 
 }

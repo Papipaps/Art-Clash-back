@@ -1,10 +1,13 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.data.Battle;
 import com.example.demo.model.data.Clash;
+import com.example.demo.model.data.Profile;
 import com.example.demo.model.dto.ClashDTO;
 import com.example.demo.payload.response.MessageResponse;
+import com.example.demo.repository.ProfileRepository;
 import com.example.demo.service.ClashService;
+import com.example.demo.utils.AuthUtils;
+import com.example.demo.utils.ClashEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,10 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("api/clash")
@@ -41,9 +43,8 @@ public class ClashController {
 
     @PatchMapping("update")
     private ResponseEntity<?> updateClash(@RequestBody ClashDTO requestDTO) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        ClashDTO clashDTO = clashService.updateClash(username, requestDTO);
+
+        ClashDTO clashDTO = clashService.updateClash(AuthUtils.getLoggedUsername(), requestDTO);
 
         if (clashDTO != null)
             return ResponseEntity.status(HttpStatus.OK).body(clashDTO);
@@ -54,10 +55,10 @@ public class ClashController {
 
     @GetMapping("list")
     private ResponseEntity<?> listClash(@RequestParam(required = false, defaultValue = "") String ownerId,
-                                        @RequestParam(required = false, defaultValue = "false") boolean finished,
+                                        @RequestParam(required = false, defaultValue = "false") boolean restricted,
                                         @RequestParam(required = false, defaultValue = "9") int size,
                                         @RequestParam(required = false, defaultValue = "0") int page) {
-        Page<Clash> clashes = clashService.listAllFilteredClash(ownerId, finished, PageRequest.of(page, size));
+        Page<Clash> clashes = clashService.listAllFilteredClash(ownerId, restricted, PageRequest.of(page, size));
         return ResponseEntity.status(HttpStatus.OK).body(clashes);
     }
 
@@ -67,17 +68,67 @@ public class ClashController {
                 .body(clashService.deleteClash(id) ? "Clash with id : " + id + " deleted." : "Could not delete clash. (doesn't exist)");
     }
 
-    @PostMapping("next/{clashId}")
-    private ResponseEntity<?> nextRoundClash(@PathVariable String clashId) {
+    @PostMapping("join/{clashId}")
+    private ResponseEntity<?> join(@PathVariable String clashId, @RequestParam(required = false) String userId) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(clashService.nextRound(clashId));
+                .body(clashService.join(AuthUtils.getLoggedUsername(), clashId, userId));
     }
 
-    @PostMapping("terminate/{clashId}")
-    private ResponseEntity<?> finishClash(@PathVariable String clashId) {
+    @Autowired
+    private ProfileRepository profileRepository;
+
+    @GetMapping("dummy/join/{clashId}")
+    private ResponseEntity<?> test(@PathVariable String clashId) {
+        String loggedUsername = AuthUtils.getLoggedUsername();
+        Profile profile = profileRepository.findByUsername(loggedUsername).get();
+        String loggedId = profile.getId();
+        String[] ids = {loggedId,
+                "63dda6093c57167920880428",
+                "63dda60e3c57167920880429",
+                "63dda6193c5716792088042a",
+                "63dda6273c5716792088042b",
+                "63dda5f13c57167920880426"};
+        for (String id : ids) {
+            clashService.join(loggedUsername, clashId, id);
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(true);
+    }
+
+    @PostMapping("exit/{clashId}")
+    private ResponseEntity<?> exit(@PathVariable String clashId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(clashService.exit(AuthUtils.getLoggedUsername(), clashId));
+    }
+
+    @PostMapping("close/{clashId}")
+    private ResponseEntity<?> close(@PathVariable String clashId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(clashService.close(clashId));
+    }
+
+    @PostMapping("finish/{clashId}")
+    private ResponseEntity<?> finish(@PathVariable String clashId) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(clashService.finishClash(clashId));
     }
 
+    @PostMapping("start/{clashId}")
+    private ResponseEntity<?> start(@PathVariable String clashId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(clashService.start(clashId));
+    }
+
+    @PostMapping("next/{clashId}")
+    private ResponseEntity<?> nextRound(@PathVariable String clashId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(clashService.nextRound(clashId));
+    }
+
+    @PostMapping("uploadMedia/{clashId}")
+    private ResponseEntity<?> nextRound(@PathVariable String clashId, @RequestBody MultipartFile file, @RequestParam String mediaDescription) throws IOException {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(clashService.uploadMedia(AuthUtils.getLoggedUsername(), clashId, file, mediaDescription));
+    }
 
 }

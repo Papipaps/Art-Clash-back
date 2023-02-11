@@ -1,25 +1,24 @@
 package com.example.demo.service;
 
-import com.example.demo.model.data.Battle;
+import com.example.demo.model.data.Contestant;
 import com.example.demo.model.data.Clash;
-import com.example.demo.model.data.Podium;
 import com.example.demo.model.data.Profile;
 import com.example.demo.model.dto.ClashDTO;
-import com.example.demo.repository.BattleRepository;
+import com.example.demo.repository.ContestantRepository;
 import com.example.demo.repository.ClashRepository;
 import com.example.demo.repository.ProfileRepository;
+import com.example.demo.utils.ClashEnum;
+import com.example.demo.utils.ContestantEnum;
 import com.example.demo.utils.mapper.ClashMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class ClashServiceImpl implements ClashService {
@@ -29,10 +28,11 @@ public class ClashServiceImpl implements ClashService {
     @Autowired
     private ProfileRepository profileRepository;
     @Autowired
-    private BattleRepository battleRepository;
+    private ContestantRepository contestantRepository;
     @Autowired
     private ClashMapper clashMapper;
-
+    @Autowired
+    private MediaService mediaService;
     @Autowired
     private SocialService socialService;
 
@@ -46,8 +46,10 @@ public class ClashServiceImpl implements ClashService {
         Profile profile = profileRepository.findByUsername(username).get();
         Clash save = Clash.builder()
                 .ownerId(profile.getId())
-                .contestants(new ArrayList<>())
+//                .contestants(new ArrayList<>())
                 .createdDate(LocalDateTime.now())
+                .status(ClashEnum.OPEN.name())
+                .restricted(true)
                 .build();
 
         return clashMapper.toDTO(clashRepository.save(clashMapper.updateClashFromDTO(clashDTO, save)));
@@ -102,9 +104,9 @@ public class ClashServiceImpl implements ClashService {
     }
 
     @Override
-    public Page<Clash> listAllFilteredClash(String ownerId, boolean finished, Pageable pageable) {
+    public Page<Clash> listAllFilteredClash(String ownerId, boolean restricted, Pageable pageable) {
         String id = ownerId.isEmpty() ? null : ownerId;
-        return id == null ? clashRepository.findAllByIsFinished(finished, pageable) : clashRepository.findAllByOwnerIdAndIsFinished(id, finished, pageable);
+        return id == null ? clashRepository.findAllByRestricted(restricted, pageable) : clashRepository.findAllByOwnerIdAndRestricted(id, restricted, pageable);
     }
 
     @Override
@@ -113,62 +115,193 @@ public class ClashServiceImpl implements ClashService {
     }
 
     @Override
-    public ClashDTO nextRound(String clashId) {
+    public boolean close(String clashId) {
+        return false;
+    }
+
+    private Clash clashCheckHandler(String clashId) {
+        if (clashId == null || clashId.length() == 0) {
+            throw new IllegalArgumentException("Id cannot be null or empty");
+        }
 
         Optional<Clash> optionalClash = clashRepository.findById(clashId);
-        if (optionalClash.isPresent()){
-            Clash clash = optionalClash.get();
 
-            int currentRound = clash.getCurrentRound();
-            int totalRound = clash.getRound();
-            List<Battle> currentContestans = clash.getContestants();
-            int nbContestans = currentContestans.size();
-            int skip = nbContestans > 6 ? 2 : 1;
-
-            if (currentRound+1==totalRound){
-
-                currentContestans.sort(Comparator.comparingInt(Battle::getScore));
-                List<Battle> winners = currentContestans.subList(nbContestans-1,nbContestans-3);
-
-                Podium podium = Podium.builder()
-                        .first(winners.get(2).getContestantId())
-                        .second(winners.get(1).getContestantId())
-                        .third(winners.get(0).getContestantId())
-                        .build();
-                clash.setFinished(true);
-                clash.setCurrentRound(totalRound);
-                clash.setPodium(podium);
-                clashRepository.save(clash);
-
-
-            }else {
-
-                List<Battle> currentBattles = clash.getContestants();
-                currentBattles.sort((Comparator.comparingInt(Battle::getScore)));
-
-                List<Battle> losers = currentBattles.subList(0, skip);
-                losers.forEach(battle -> {
-                    battle.setCurrentRound(currentRound);
-                    battleRepository.save(battle);
-                });
-
-                List<Battle> winners = currentBattles.stream().skip(skip)
-                        .map(battle -> {
-                    battle.setHasWin(true);
-                    battle.setCurrentRound(currentRound);
-                    battleRepository.save(battle);
-                    battle.setMediaId("");
-                    battle.setHasWin(false);
-                    return battle;
-                }).collect(Collectors.toList());
-
-                clash.setContestants(winners);
-                clash.setCurrentRound(currentRound+1);
-                return clashMapper.toDTO(clashRepository.save(clash));
-            }
-
+        if (optionalClash.isEmpty()) {
+            throw new IllegalArgumentException("Clash doesn't exist");
         }
-        return null;
+        return optionalClash.get();
+    }
 
+    @Override
+    public ClashDTO start(String clashId) {
+        Clash clash = clashCheckHandler(clashId);
+        if (clash.getStatus().equals(ClashEnum.OPEN.name())) {
+            clash.setStatus(ClashEnum.ONGOING.name());
+            List<Contestant> contestants = contestantRepository.findAllByClashId(clashId);
+//            clash.setArtists((String[]) contestants.stream().map(Contestant::getContestantId).toArray());
+            contestants.forEach(contestant -> {
+                contestant.setCurrentRound(1);
+                contestantRepository.save(contestant);
+            });
+            clash.setCurrentRound(1);
+            return clashMapper.toDTO(clashRepository.save(clash));
+        }else {
+            throw new IllegalArgumentException("CAN'T START FINISHED CLASH");
+        }
+    }
+
+    @Override
+    public boolean uploadMedia(String loggedUsername, String clashId, MultipartFile file, String mediaDescription) throws IOException {
+
+        Clash clash = clashCheckHandler(clashId);
+
+        Profile profile = profileRepository.findByUsername(loggedUsername).get();
+        Optional<Contestant> optionalContestant = contestantRepository.findByClashIdAndContestantId(clashId, profile.getId());
+        if (optionalContestant.isEmpty()) {
+            throw new IllegalArgumentException("");
+        }
+        Contestant contestant = optionalContestant.get();
+        String mediaId = mediaService.uploadImageToDB(file, loggedUsername).getPayload().toString();
+
+        contestant.setMediaId(mediaId);
+        contestant.setMediaDescription(mediaDescription);
+        contestant.setStatus(ContestantEnum.SUBMITTED.name());
+
+        contestantRepository.save(contestant);
+
+        return true;
+    }
+
+    @Override
+    public boolean join(String username, String clashid, String userId) {
+//        Clash clash = clashCheckHandler(clashid);
+//
+//        Profile profile = userId == null || userId.isEmpty() ? profileRepository.findByUsername(username).get() : profileRepository.findById(userId).get();
+//
+//        Optional<Contestant> optionalContestant = contestantRepository.findByClashIdAndContestantId(clashid, profile.getId());
+//
+//        if (optionalContestant.isPresent()) {
+//            throw new IllegalArgumentException("DEJA REJOINT");
+//        }
+//
+//        List<String> contestants = clash.getContestants();
+//
+//        if (contestants == null) {
+//            contestants = new ArrayList<>();
+//        }
+//
+//        if (contestants.size() >= clash.getSlot()) {
+//            throw new IllegalArgumentException("CLASH COMPLET");
+//        }
+//
+//        if (!clash.getStatus().equals(ClashEnum.OPEN.name())) {
+//            throw new IllegalArgumentException("PAS OUVERT");
+//        }
+//
+//        contestants.add(contestantRepository.save(Contestant.builder()
+//                .clashId(clashid)
+//                .contestantId(profile.getId())
+//                .mediaId("")
+//                .score((int) (Math.random() * 100))
+//                .build()).getId());
+//
+//        clash.setContestants(contestants);
+//        clashRepository.save(clash);
+        return true;
+    }
+
+    @Override
+    public boolean exit(String username, String clashid) {
+//        Clash clash = clashCheckHandler(clashid);
+//        Profile profile = profileRepository.findByUsername(username).get();
+//
+//        Optional<Contestant> optionalContestant = contestantRepository.findByClashIdAndContestantId(clashid, profile.getId());
+//
+//        if (optionalContestant.isEmpty()) {
+//            throw new IllegalArgumentException("pas dedans");
+//        }
+//
+//        List<String> contestants = clash.getContestants();
+//
+//        contestants.remove(optionalContestant.get().getId());
+//
+//        contestantRepository.deleteById(optionalContestant.get().getId());
+//
+//        clash.setContestants(contestants);
+//
+//        clashRepository.save(clash);
+        return true;
+    }
+
+
+    @Override
+    public ClashDTO nextRound(String clashId) {
+//        Clash clash = clashCheckHandler(clashId);
+//        if (clash.getStatus().equals(ClashEnum.FINISHED.name())) {
+//            throw new IllegalArgumentException("THIS CLASH IS FINISH");
+//        }
+//        int currentRound = clash.getCurrentRound();
+//        int totalRound = clash.getRound();
+//        List<String> contestantsIds = clash.getContestants();
+//        List<Contestant> currentContestants = contestantsIds.stream()
+//                .map(id -> contestantRepository.findById(id).orElse(null))
+//                .filter(Objects::nonNull)
+//                .collect(Collectors.toList());
+//        int nbContestans = currentContestants.size();
+//        int skip = nbContestans > 6 ? 2 : 1;
+//
+//        int nextRound = currentRound + 1;
+//
+//        currentContestants.sort(Comparator.comparingInt(Contestant::getScore));
+//
+//        if (currentRound == totalRound || nbContestans == 3) {
+//
+//            Podium podium = Podium.builder()
+//                    .first(currentContestants.get(nbContestans - 1).getContestantId())
+//                    .second(currentContestants.get(nbContestans - 2).getContestantId())
+//                    .third(currentContestants.get(nbContestans - 3).getContestantId())
+//                    .build();
+//
+//            currentContestants.forEach(contestant -> {
+//                contestant.setHasWin(true);
+//                contestant.setCurrentRound(currentRound);
+//                contestant.setGlobalScore(contestant.getGlobalScore() + contestant.getScore());
+//                contestantRepository.save(contestant);
+//            });
+//
+//            clash.setStatus(ClashEnum.FINISHED.name());
+//            clash.setCurrentRound(totalRound);
+//            clash.setPodium(podium);
+//            clashRepository.save(clash);
+//
+//
+//        } else {
+//
+//            List<Contestant> losers = currentContestants.subList(0, skip);
+//            losers.forEach(contestant -> {
+//                contestant.setCurrentRound(currentRound);
+//                contestantRepository.save(contestant);
+//            });
+//            List<String> winners = currentContestants.stream().skip(skip)
+//                    .map(battle -> {
+//                        battle.setHasWin(true);
+//                        battle.setCurrentRound(currentRound);
+//                        contestantRepository.save(battle);
+//                        return contestantRepository.save(Contestant.builder()
+//                                .globalScore(battle.getGlobalScore() + battle.getScore())
+//                                .score((int) (Math.random() * 100))
+//                                .contestantId(battle.getContestantId())
+//                                .clashId(battle.getClashId())
+//                                .mediaId("")
+//                                .mediaDescription("")
+//                                .currentRound(nextRound)
+//                                .build()).getId();
+//                    }).collect(Collectors.toList());
+//
+//            clash.setContestants(winners);
+//            clash.setCurrentRound(nextRound);
+//        }
+//        return clashMapper.toDTO(clashRepository.save(clash));
+        return null;
     }
 }

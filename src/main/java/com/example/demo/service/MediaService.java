@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.model.data.Media;
 import com.example.demo.model.dto.MediaDTO;
+import com.example.demo.payload.response.MessageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public interface MediaService {
 
     String uploadImageToFileSystem(MultipartFile file, String ownerId) throws IOException;
 
-    ResponseEntity<?> uploadImageToDB(MultipartFile file, String ownerId) throws IOException;
+    MessageResponse uploadImageToDB(MultipartFile file, String loggedUsername) throws IOException;
 
     Page<Media> downloadAllMediaIdByOwner(String id, Pageable pageable) throws IOException;
 

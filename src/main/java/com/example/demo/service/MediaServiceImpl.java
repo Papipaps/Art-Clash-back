@@ -1,7 +1,6 @@
 package com.example.demo.service;
 
 import com.example.demo.model.data.Media;
-import com.example.demo.model.data.Post;
 import com.example.demo.model.data.Profile;
 import com.example.demo.model.dto.MediaDTO;
 import com.example.demo.payload.response.MessageResponse;
@@ -25,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -118,12 +116,12 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public ResponseEntity<?> uploadImageToDB(MultipartFile file, String loggedUsername) throws IOException {
+    public MessageResponse uploadImageToDB(MultipartFile file, String loggedUsername) throws IOException {
 
         Profile profil = profilRepository.findByUsername(loggedUsername).get();
 
         if (fileDataRepository.countAllByOwnerId(profil.getId()) >= 20) {
-            return ResponseEntity.status(HttpStatus.OK).body(MessageResponse.builder().message("Can't upload more than 20 images.").hasError(true).build());
+            return MessageResponse.builder().message("Can't upload more than 20 images.").hasError(true).build();
         }
 
         if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
@@ -159,11 +157,10 @@ public class MediaServiceImpl implements MediaService {
                 .fileSize(file.getSize())
                 .build());
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(MessageResponse.builder()
+        return MessageResponse.builder()
                     .message("file uploaded successfully with id : " + save.getId())
                     .payload(save.getId())
-                    .build());
+                    .build();
 
     }
 @Autowired
