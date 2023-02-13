@@ -13,6 +13,6 @@ services:
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./database/data:/data/db
