@@ -32,4 +32,6 @@ build/
 ### VS Code ###
 .vscode/
 
-/src/main/front/node_modules
+src/main/resources/secret.properties
+
+.env
