@@ -7,6 +7,10 @@ services:
       - "8080:8080"
     depends_on:
       - postgres-container
+    environment:
+      - spring_datasource_url=${DATASOURCE_URL}
+      - spring_datasource_username=${DATASOURCE_USERNAME}
+      - spring_datasource_password=${DATASOURCE_PASSWORD}
   postgres-container:
     image: postgres:alpine
     restart: unless-stopped

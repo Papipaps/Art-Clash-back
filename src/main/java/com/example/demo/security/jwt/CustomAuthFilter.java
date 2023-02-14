@@ -47,13 +47,13 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
         List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
         String access_token = JWT.create()
                 .withSubject(userDetails.getUsername())
-                .withExpiresAt(instant.plus(1, ChronoUnit.DAYS))
+                .withExpiresAt(instant.plus(7, ChronoUnit.DAYS))
                 .withIssuer(request.getRequestURL().toString())
                 .withClaim("roles", roles)
                 .sign(algorithm);
         String refresh_token = JWT.create()
                 .withSubject(userDetails.getUsername())
-                .withExpiresAt(instant.plus(1, ChronoUnit.DAYS))
+                .withExpiresAt(instant.plus(14, ChronoUnit.DAYS))
                 .withIssuer(request.getRequestURL().toString())
                 .sign(algorithm);
         Map<String,String> tokens= new HashMap<>();
