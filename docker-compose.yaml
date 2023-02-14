@@ -11,6 +11,7 @@ services:
       - spring_datasource_url=${DATASOURCE_URL}
       - spring_datasource_username=${DATASOURCE_USERNAME}
       - spring_datasource_password=${DATASOURCE_PASSWORD}
+      - spring_datasource_driver-class-name=${DRIVER_CLASS}
   postgres-container:
     image: postgres:alpine
     restart: unless-stopped
