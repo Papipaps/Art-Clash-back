@@ -9,7 +9,7 @@ import java.util.Optional;
 @Repository
 
 public interface ContestantRepository extends JpaRepository<Contestant, String> {
-    Optional<Contestant> findByClashIdAndContestantId(String clashId, String userId);
+    Optional<Contestant> findByClashIdAndProfileId(String clashId, String userId);
     Optional<Contestant> findByClashId(String clashId);
     List<Contestant> findAllByClashId(String clashId);
 }

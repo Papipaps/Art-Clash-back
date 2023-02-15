@@ -11,6 +11,8 @@ import javax.persistence.*;
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Contestant {
 
     @Id
@@ -19,7 +21,7 @@ public class Contestant {
     @Column(length = 36, nullable = false, updatable = false)
     private String id;
     private String clashId;
-    private String contestantId;
+    private String profileId;
     private String mediaId;
     private boolean hasWin;
     private int currentRound;

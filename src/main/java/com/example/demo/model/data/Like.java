@@ -1,7 +1,9 @@
 package com.example.demo.model.data;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -11,6 +13,8 @@ import java.time.LocalDateTime;
 @Table(name = "likes")
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Like {
     @Id
     @GenericGenerator(name = "uuid2", strategy = "uuid2")

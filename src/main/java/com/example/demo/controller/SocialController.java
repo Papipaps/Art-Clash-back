@@ -6,6 +6,7 @@ import com.example.demo.payload.response.MessageResponse;
 import com.example.demo.service.RelationshipService;
 import com.example.demo.service.SocialService;
 import com.example.demo.utils.AuthUtils;
+import com.example.demo.utils.EntityEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -51,7 +52,7 @@ public class SocialController {
     }
 
     @PostMapping("like/{id}")
-    private ResponseEntity<?> likeEntity(@PathVariable String id, @RequestParam String tag){
+    private ResponseEntity<?> likeEntity(@PathVariable String id, @RequestParam(defaultValue = "post") String tag){
         boolean res = socialService.likeEntity(AuthUtils.getLoggedUsername(), id, tag);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }

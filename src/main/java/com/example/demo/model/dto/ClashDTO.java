@@ -1,5 +1,6 @@
 package com.example.demo.model.dto;
 
+import com.example.demo.model.data.Contestant;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,7 +18,7 @@ public class ClashDTO extends BaseDTO {
     private String title;
     private String theme;
      private String description;
-    private List<String> contestants;
+    private List<ContestantDTO> contestants;
     private LocalDateTime createdDate;
     private boolean isFinished;
     private int likes;

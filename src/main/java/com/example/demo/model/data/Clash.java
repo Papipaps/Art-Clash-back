@@ -1,7 +1,9 @@
 package com.example.demo.model.data;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -12,6 +14,8 @@ import java.util.List;
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Clash {
 
     @Id
@@ -23,8 +27,12 @@ public class Clash {
     private String title;
     private String theme;
     private String description;
-//    @ManyToMany
-//    private Collection<Contestant> contestants;
+    @OneToMany
+    @JoinTable(
+            name = "clash_contestant",
+            joinColumns = @JoinColumn(name = "clash_id"),
+            inverseJoinColumns = @JoinColumn(name = "contestant_id"))
+    private Collection<Contestant> contestants;
     private LocalDateTime createdDate;
     private boolean restricted;
     private String status;
@@ -35,8 +43,5 @@ public class Clash {
     private String third;
     private int currentRound;
     private int slot;
-
-
-//    private String[] artists;
 
 }

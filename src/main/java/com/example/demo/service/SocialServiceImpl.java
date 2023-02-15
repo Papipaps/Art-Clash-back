@@ -121,44 +121,46 @@ public class SocialServiceImpl implements SocialService {
             throw new IllegalArgumentException("");
         }
         Profile profile = profilRepository.findByUsername(loggedUsername).get();
-        Like like = likeRepository.findByEntityIdAndAdorerId(entityId,profile.getId());
-        if (like == null) {
-            likeRepository.save(Like.builder()
-                    .entityId(entityId)
-                    .adorerId(profile.getId())
-                    .createdAt(LocalDateTime.now())
-                    .tag(tag)
-                    .build());
-            switch (tag.toUpperCase()){
-                case "CLASH":
-                    Optional<Clash> clash = clashRepository.findById(entityId);
-                    if (clash.isPresent()){
-                        int nbLikes = clash.get().getLikes();
-                        clash.get().setLikes(nbLikes+1);
-                        clashRepository.save(clash.get());
-                    }
-                    break;
-                case "COMMENT":
-                    Optional<Comment> comment = commentRepository.findById(entityId);
-                    if (comment.isPresent()){
-                        int nbLikes = comment.get().getLikes();
-                        comment.get().setLikes(nbLikes+1);
-                        commentRepository.save(comment.get());
-                    }
-                    break;
-                case "POST":
-                    Optional<Post> post = postRepository.findById(entityId);
-                    if (post.isPresent()){
-                        int nbLikes = post.get().getLikes();
-                        post.get().setLikes(nbLikes+1);
-                        postRepository.save(post.get());
-                    }
-                    break;
-            }
-            return true;
-        } else {
+        Optional<Like> optionalLike = likeRepository.findByEntityIdAndAdorerId(entityId, profile.getId());
+
+        if (optionalLike.isPresent()) {
             return false;
         }
+
+        switch (tag.toUpperCase()) {
+            case "CLASH":
+                Optional<Clash> clash = clashRepository.findById(entityId);
+                if (clash.isPresent()) {
+                    int nbLikes = clash.get().getLikes();
+                    clash.get().setLikes(nbLikes + 1);
+                    clashRepository.save(clash.get());
+                }
+                break;
+            case "COMMENT":
+                Optional<Comment> comment = commentRepository.findById(entityId);
+                if (comment.isPresent()) {
+                    int nbLikes = comment.get().getLikes();
+                    comment.get().setLikes(nbLikes + 1);
+                    commentRepository.save(comment.get());
+                }
+                break;
+            case "POST":
+                Optional<Post> post = postRepository.findById(entityId);
+                if (post.isPresent()) {
+                    int nbLikes = post.get().getLikes();
+                    post.get().setLikes(nbLikes + 1);
+                    postRepository.save(post.get());
+                }
+                break;
+        }
+        likeRepository.save(Like.builder()
+                .entityId(entityId)
+                .adorerId(profile.getId())
+                .createdAt(LocalDateTime.now())
+                .tag(tag)
+                .build());
+        return true;
+
     }
 
     @Override
@@ -167,39 +169,40 @@ public class SocialServiceImpl implements SocialService {
             throw new IllegalArgumentException("");
         }
         Profile profile = profilRepository.findByUsername(loggedUsername).get();
-        Like like = likeRepository.findByEntityIdAndAdorerId(entityId,profile.getId());
-        if (like == null) {
+        Optional<Like> optionalLike = likeRepository.findByEntityIdAndAdorerId(entityId, profile.getId());
+        if (optionalLike.isEmpty()) {
             return false;
-        } else {
-            likeRepository.deleteById(like.getId());
-            switch (like.getTag().toUpperCase()){
-                case "CLASH":
-                    Optional<Clash> clash = clashRepository.findById(entityId);
-                    if (clash.isPresent()){
-                        int nbLikes = clash.get().getLikes();
-                        clash.get().setLikes(nbLikes-1);
-                        clashRepository.save(clash.get());
-                    }
-                    break;
-                case "COMMENT":
-                    Optional<Comment> comment = commentRepository.findById(entityId);
-                    if (comment.isPresent()){
-                        int nbLikes = comment.get().getLikes();
-                        comment.get().setLikes(nbLikes-1);
-                        commentRepository.save(comment.get());
-                    }
-                    break;
-                case "POST":
-                    Optional<Post> post = postRepository.findById(entityId);
-                    if (post.isPresent()){
-                        int nbLikes = post.get().getLikes();
-                        post.get().setLikes(nbLikes-1);
-                        postRepository.save(post.get());
-                    }
-                    break;
-            }
-            return true;
         }
+        Like like = optionalLike.get();
+        switch (like.getTag().toUpperCase()) {
+            case "CLASH":
+                Optional<Clash> clash = clashRepository.findById(entityId);
+                if (clash.isPresent()) {
+                    int nbLikes = clash.get().getLikes();
+                    clash.get().setLikes(nbLikes - 1);
+                    clashRepository.save(clash.get());
+                }
+                break;
+            case "COMMENT":
+                Optional<Comment> comment = commentRepository.findById(entityId);
+                if (comment.isPresent()) {
+                    int nbLikes = comment.get().getLikes();
+                    comment.get().setLikes(nbLikes - 1);
+                    commentRepository.save(comment.get());
+                }
+                break;
+            case "POST":
+                Optional<Post> post = postRepository.findById(entityId);
+                if (post.isPresent()) {
+                    int nbLikes = post.get().getLikes();
+                    post.get().setLikes(nbLikes - 1);
+                    postRepository.save(post.get());
+                }
+                break;
+        }
+        likeRepository.deleteById(like.getId());
+        return true;
+
     }
 
     @Override
@@ -207,6 +210,6 @@ public class SocialServiceImpl implements SocialService {
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("");
         }
-        return likeRepository.findAllByEntityId(id,pageable);
+        return likeRepository.findAllByEntityId(id, pageable);
     }
 }

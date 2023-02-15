@@ -25,7 +25,7 @@ public interface ClashService {
 
     ClashDTO nextRound(String clashId);
 
-    boolean join(String loggedUsername, String clashId, String userId);
+    ClashDTO join(String loggedUsername, String clashId, String userId);
 
     boolean exit(String loggedUsername, String clashId);
 

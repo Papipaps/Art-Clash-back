@@ -45,7 +45,6 @@ public class Profile {
     @ManyToMany(targetEntity = Role.class)
     private Collection<Role> roles;
     private String firstname;
-
     private String backgroundId;
     private String avatarId;
     private String lastname;

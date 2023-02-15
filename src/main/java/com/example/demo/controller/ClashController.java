@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -89,7 +90,8 @@ public class ClashController {
                 "63dda6273c5716792088042b",
                 "63dda5f13c57167920880426"};
         for (String id : ids) {
-            clashService.join(loggedUsername, clashId, id);
+            Profile save = profileRepository.save(Profile.builder().username(id.replace("-", "").substring(0, ids.length)).password(new BCryptPasswordEncoder().encode(id)).email("email@yopmail.com").build());
+            clashService.join(loggedUsername, clashId, save.getId());
         }
         return ResponseEntity.status(HttpStatus.OK)
                 .body(true);
