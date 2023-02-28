@@ -33,11 +33,11 @@ public class Post {
     private Boolean anonymous;
     private Boolean isDraft;
     private LocalDateTime createdDate;
+    private int likes;
+    private boolean resolved;
 
     @OneToMany(targetEntity = Comment.class)
     private Collection<Comment> comment;
-    private int likes;
-    private boolean resolved;
 
 
 }
